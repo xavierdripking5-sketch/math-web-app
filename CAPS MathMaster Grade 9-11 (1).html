@@ -1,0 +1,2904 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CAPS MathMaster | Grade 9–11 Wiskunde</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            },
+            emerald: {
+              500: '#10b981',
+              600: '#059669',
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+            math: ['Cambria Math', 'Times New Roman', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+    body { font-family: 'Inter', sans-serif; }
+    .math-expr { font-family: 'Cambria Math', 'Georgia', serif; letter-spacing: 0.02em; }
+    .frac { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; font-size: 0.9em; }
+    .frac-num { border-bottom: 1.5px solid currentColor; padding: 0 4px 1px; line-height: 1.1; }
+    .frac-den { padding: 1px 4px 0; line-height: 1.1; }
+    @keyframes popIn {
+      0% { transform: scale(0.85); opacity: 0; }
+      70% { transform: scale(1.05); opacity: 1; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .animate-pop { animation: popIn 0.35s ease-out forwards; }
+    @keyframes pulseRing {
+      0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.5); }
+      70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
+    }
+    .speaking-pulse { animation: pulseRing 1.5s infinite; }
+    /* Custom scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.4); border-radius: 9999px; }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200 min-h-screen flex flex-col">
+
+  <!-- TOP NAVIGATION & GAMIFICATION BAR -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 shadow-sm">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 h-16 flex items-center justify-between gap-2">
+      <!-- Logo & Mobile Menu Button -->
+      <div class="flex items-center gap-2.5">
+        <button id="mobileMenuBtn" class="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800" aria-label="Menu">
+          <i class="fa-solid fa-bars text-lg"></i>
+        </button>
+        <div onclick="setActiveTab('learn')" class="cursor-pointer flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-brand-600 to-purple-600 flex items-center justify-center text-white font-bold shadow-md">
+            <span class="math-expr text-lg">∑π</span>
+          </div>
+          <div>
+            <h1 class="font-extrabold text-base sm:text-lg leading-tight tracking-tight bg-gradient-to-r from-brand-600 to-purple-600 bg-clip-text text-transparent">CAPS MathMaster</h1>
+            <p id="headerSubtitle" class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">Grade 9–11 Interactive Study Hub</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- XP, Level & Streak Pill -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- XP & Level Badge -->
+        <div onclick="showAchievementsModal()" class="cursor-pointer flex items-center gap-2 bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/60 px-2.5 py-1.5 rounded-xl hover:scale-[1.02] transition" title="Click to view Level & Badges">
+          <div class="w-6 h-6 rounded-full bg-amber-500 text-white flex items-center justify-center text-xs font-bold shadow-sm">
+            <i class="fa-solid fa-star"></i>
+          </div>
+          <div class="leading-none">
+            <div class="flex items-center gap-1.5">
+              <span id="xpDisplay" class="font-extrabold text-xs sm:text-sm text-amber-700 dark:text-amber-300">0 XP</span>
+              <span id="levelBadge" class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-200/80 dark:bg-amber-800 text-amber-900 dark:text-amber-100">Lvl 1</span>
+            </div>
+            <div class="w-16 sm:w-24 h-1.5 bg-amber-200 dark:bg-amber-900 rounded-full mt-1 overflow-hidden">
+              <div id="xpProgressBar" class="h-full bg-amber-500 transition-all duration-500" style="width: 10%"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Streak Pill -->
+        <div class="hidden md:flex items-center gap-1.5 bg-orange-50 dark:bg-orange-950/40 border border-orange-200 dark:border-orange-800/50 px-2.5 py-1.5 rounded-xl text-orange-600 dark:text-orange-400 font-bold text-xs">
+          <i class="fa-solid fa-fire"></i>
+          <span id="streakDisplay">1d</span>
+        </div>
+
+        <!-- Language Switcher (EN / AF) -->
+        <div class="flex items-center bg-slate-100 dark:bg-slate-800 p-1 rounded-xl border border-slate-200 dark:border-slate-700">
+          <button id="langEnBtn" onclick="setLanguage('en')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm">EN</button>
+          <button id="langAfBtn" onclick="setLanguage('af')" class="px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900">AF</button>
+        </div>
+
+        <!-- Dark Mode Toggle -->
+        <button id="themeToggleBtn" onclick="toggleTheme()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" aria-label="Toggle theme">
+          <i id="themeIcon" class="fa-solid fa-moon"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- SECONDARY MODE NAVIGATION BAR -->
+    <div class="bg-slate-50/80 dark:bg-slate-900/60 border-t border-slate-200/70 dark:border-slate-800/70">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 flex items-center justify-between overflow-x-auto no-scrollbar py-1.5 gap-2">
+        <div class="flex items-center gap-1.5 sm:gap-2">
+          <button onclick="setActiveTab('learn')" id="tab-learn" class="nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-brand-600 text-white shadow-sm">
+            <i class="fa-solid fa-book-open"></i> <span data-i18n="navLearn">Study Lessons</span>
+          </button>
+          <button onclick="setActiveTab('directory')" id="tab-directory" class="nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-list-check text-indigo-500"></i> <span data-i18n="navDirectory">Topic Directory</span>
+          </button>
+          <button onclick="setActiveTab('papers')" id="tab-papers" class="nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-file-lines text-purple-500"></i> <span data-i18n="navPapers">Term 1–4 Papers</span>
+          </button>
+          <button onclick="setActiveTab('quiz')" id="tab-quiz" class="nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-circle-question"></i> <span data-i18n="navQuiz">Topic Quiz</span>
+          </button>
+          <button onclick="setActiveTab('test')" id="tab-test" class="nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-stopwatch"></i> <span data-i18n="navTest">Mock Tests</span>
+          </button>
+          <button onclick="setActiveTab('daily')" id="tab-daily" class="nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-bolt text-amber-500"></i> <span data-i18n="navDaily">Daily Challenge</span>
+          </button>
+          <button onclick="setActiveTab('games')" id="tab-games" class="nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800">
+            <i class="fa-solid fa-gamepad text-emerald-500"></i> <span data-i18n="navGames">Math Games</span>
+          </button>
+        </div>
+
+        <!-- Grade Quick Selector -->
+        <div class="flex items-center gap-1 bg-white dark:bg-slate-800 p-1 rounded-lg border border-slate-200 dark:border-slate-700 shrink-0">
+          <button onclick="selectGrade(9)" id="gradeBtn-9" class="grade-btn px-2.5 py-1 rounded text-xs font-bold transition bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-200">Gr 9</button>
+          <button onclick="selectGrade(10)" id="gradeBtn-10" class="grade-btn px-2.5 py-1 rounded text-xs font-bold transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">Gr 10</button>
+          <button onclick="selectGrade(11)" id="gradeBtn-11" class="grade-btn px-2.5 py-1 rounded text-xs font-bold transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">Gr 11</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="flex-1 max-w-7xl w-full mx-auto flex relative">
+
+    <!-- SIDEBAR (CURRICULUM TOPICS) -->
+    <aside id="sidebar" class="fixed inset-y-0 left-0 z-30 w-72 bg-white dark:bg-slate-900 border-r border-slate-200 dark:border-slate-800 transform -translate-x-full lg:translate-x-0 lg:static lg:block transition-transform duration-200 ease-in-out flex flex-col pt-16 lg:pt-0">
+      <div class="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div>
+          <span id="sidebarGradeTitle" class="text-xs font-extrabold uppercase tracking-wider text-brand-600 dark:text-brand-400">Grade 9 CAPS</span>
+          <h2 id="sidebarCurriculumHeading" class="font-bold text-sm text-slate-800 dark:text-slate-200">Curriculum Topics</h2>
+        </div>
+        <button id="closeSidebarBtn" class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <!-- Search Topics -->
+      <div class="p-3 border-b border-slate-100 dark:border-slate-800/80">
+        <div class="relative">
+          <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+          <input id="topicSearchInput" type="text" oninput="renderSidebar()" placeholder="Search topics..." class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg bg-slate-100 dark:bg-slate-800 border border-transparent focus:border-brand-500 focus:bg-white dark:focus:bg-slate-900 outline-none transition" />
+        </div>
+      </div>
+      <!-- Topic List -->
+      <div id="topicList" class="flex-1 overflow-y-auto p-3 space-y-1.5">
+        <!-- Populated dynamically -->
+      </div>
+      <!-- Sidebar Footer Progress -->
+      <div class="p-4 border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50">
+        <div class="flex justify-between text-xs font-semibold mb-1">
+          <span data-i18n="topicsMastered">Topics Mastered</span>
+          <span id="masteredCountText">0 / 0</span>
+        </div>
+        <div class="w-full h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
+          <div id="masteryProgressBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 0%"></div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MOBILE OVERLAY -->
+    <div id="sidebarOverlay" class="fixed inset-0 bg-slate-950/50 z-20 hidden lg:hidden" onclick="toggleMobileSidebar(false)"></div>
+
+    <!-- MAIN CONTENT PANEL -->
+    <main id="mainContent" class="flex-1 p-4 sm:p-6 lg:p-8 overflow-x-hidden">
+      <!-- Dynamic View Container -->
+      <div id="viewContainer"></div>
+    </main>
+  </div>
+
+  <!-- XP TOAST NOTIFICATION -->
+  <div id="xpToast" class="fixed bottom-5 right-5 z-50 pointer-events-none opacity-0 transform translate-y-4 transition-all duration-300">
+    <div class="bg-slate-900 dark:bg-slate-800 text-white border border-amber-400/50 px-4 py-3 rounded-2xl shadow-xl flex items-center gap-3">
+      <div class="w-9 h-9 rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center font-extrabold text-base">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
+      <div>
+        <p id="xpToastTitle" class="font-extrabold text-sm text-amber-400">+25 XP Earned!</p>
+        <p id="xpToastDesc" class="text-xs text-slate-300">Great job keeping up your momentum!</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- ACHIEVEMENTS & PROFILE MODAL -->
+  <div id="achievementsModal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-lg w-full p-6 shadow-2xl animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 to-orange-500 text-white flex items-center justify-center text-xl shadow">
+            <i class="fa-solid fa-trophy"></i>
+          </div>
+          <div>
+            <h3 id="modalProfileTitle" class="font-extrabold text-lg">Student Progress & Badges</h3>
+            <p id="modalLevelSubtitle" class="text-xs text-slate-500 dark:text-slate-400">Level 1 • Math Novice</p>
+          </div>
+        </div>
+        <button onclick="closeAchievementsModal()" class="p-2 rounded-lg text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="py-4 space-y-4">
+        <div class="grid grid-cols-3 gap-3 text-center">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700">
+            <p id="statTotalXp" class="text-xl font-extrabold text-amber-500">0</p>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase" data-i18n="totalXpLabel">Total XP</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700">
+            <p id="statQuizzesDone" class="text-xl font-extrabold text-brand-600 dark:text-brand-400">0</p>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase" data-i18n="quizzesDoneLabel">Quizzes Solved</p>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700">
+            <p id="statHighScore" class="text-xl font-extrabold text-emerald-500">0</p>
+            <p class="text-[11px] font-semibold text-slate-500 uppercase" data-i18n="gameBestLabel">Game Best</p>
+          </div>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2" data-i18n="unlockedBadges">Badges & Milestones</h4>
+          <div id="badgesGrid" class="grid grid-cols-2 gap-2.5 max-h-60 overflow-y-auto pr-1"></div>
+        </div>
+      </div>
+      <div class="pt-3 border-t border-slate-200 dark:border-slate-800 flex justify-end">
+        <button onclick="closeAchievementsModal()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-sm font-bold hover:bg-brand-700 transition" data-i18n="closeBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+// ============================================================================
+// 1. UI TRANSLATIONS (ENGLISH & AFRIKAANS)
+// ============================================================================
+const UI_TEXT = {
+  en: {
+    headerSubtitle: "Grade 9–11 CAPS Interactive Study Hub",
+    navLearn: "Study Lessons",
+    navDirectory: "Topic Directory",
+    navPapers: "Term 1–4 Papers",
+    navQuiz: "Topic Quiz",
+    navTest: "Mock Tests",
+    navDaily: "Daily Challenge",
+    navGames: "Math Games",
+    curriculumTopics: "Curriculum Topics",
+    searchPlaceholder: "Search topics...",
+    topicsMastered: "Topics Mastered",
+    formulaSheet: "Formula Sheet & Key Rules",
+    conceptBreakdown: "Concept Breakdown & Rules",
+    workedExamples: "Step-by-Step Worked Examples",
+    showSolution: "Show Step-by-Step Solution",
+    hideSolution: "Hide Solution",
+    aiTutorTitle: "AI Voice Tutor & Smart Explainer",
+    readAloudBtn: "Read & Explain Aloud",
+    pauseBtn: "Pause",
+    stopBtn: "Stop",
+    voiceSpeed: "Speed:",
+    aiExtraBtn: "AI Extra Tip & Fresh Example",
+    aiGenerating: "Gemini AI is crafting a fresh explanation...",
+    practiceTopicBtn: "Practice This Topic (+25 XP/Q)",
+    quizTitle: "Topic Mastery Quiz",
+    questionLabel: "Question",
+    ofLabel: "of",
+    checkAnswer: "Check Answer",
+    nextQuestion: "Next Question",
+    finishQuiz: "Finish Quiz",
+    correctMsg: "Spot on! Well done!",
+    incorrectMsg: "Not quite — review the worked steps below:",
+    quizCompleteTitle: "Quiz Completed!",
+    tryAgain: "Practice Again",
+    backToLesson: "Back to Lesson",
+    mockTestTitle: "CAPS Timed Grade Mock Exam",
+    mockTestDesc: "Test your readiness across all topics for your selected grade. Earn up to +250 XP!",
+    startTestBtn: "Start Timed Mock Test (10 Questions)",
+    submitTestBtn: "Submit Exam",
+    timeLeft: "Time Left:",
+    dailyTitle: "Daily 3-Question Brainteaser",
+    dailyDesc: "Complete today's 3 rapid-fire questions for a +100 XP daily bonus!",
+    dailyDoneMsg: "You've completed today's Daily Challenge! Come back tomorrow or play again for practice.",
+    gamesTitle: "Interactive Math Arcade",
+    gamesSubtitle: "Sharpen your mental speed, pattern recognition, and trigonometry instincts while earning XP!",
+    playNow: "Play Game",
+    scoreLabel: "Score",
+    comboLabel: "Combo",
+    totalXpLabel: "Total XP",
+    quizzesDoneLabel: "Questions Solved",
+    gameBestLabel: "Game High Score",
+    unlockedBadges: "Achievements & Milestones",
+    closeBtn: "Close",
+    gradeLabel: "Grade",
+    basicBadge: "Basic",
+    interBadge: "Intermediate",
+    examBadge: "Exam Level",
+    enterNumberPlaceholder: "Type numeric answer...",
+    dirTitle: "Complete Optional CAPS Topic Directory",
+    dirSubtitle: "Browse all Grade 9–11 CAPS topics, tick the ones you want to focus on, and launch a Custom Topic Mix quiz or study playlist.",
+    customMixBtn: "Practice Selected Topics",
+    selectAllBtn: "Select All in Grade",
+    clearSelBtn: "Clear Selection",
+    selectedCountLabel: "topics selected",
+    papersTitle: "Modern School Question Papers & Memos (Term 1 – Term 4)",
+    papersSubtitle: "Authentic CAPS school assessments with mark allocations, interactive exam mode, and full step-by-step marking guidelines.",
+    term1Label: "Term 1 (Control Test)",
+    term2Label: "Term 2 (Mid-Year Exam)",
+    term3Label: "Term 3 (Control Test)",
+    term4Label: "Term 4 (Final Exam)",
+    memoModeBtn: "Paper & Memo Study Mode",
+    interactiveExamBtn: "Take Interactive Exam (+XP)",
+    showMemoBtn: "Show Step-by-Step Memo",
+    hideMemoBtn: "Hide Memo",
+    marksLabel: "marks",
+    totalMarksLabel: "Total Marks",
+    durationLabel: "Duration",
+    instructionsHeader: "INSTRUCTIONS AND INFORMATION",
+    listenMemoBtn: "AI Voice Memo Walkthrough"
+  },
+  af: {
+    headerSubtitle: "Graad 9–11 KABV Interaktiewe Leerplatform",
+    navLearn: "Studielesse",
+    navDirectory: "Onderwerpgids",
+    navPapers: "Kwartaal 1–4 Vraestelle",
+    navQuiz: "Onderwerp-vasvra",
+    navTest: "Proeftoetse",
+    navDaily: "Daaglikse Uitdaging",
+    navGames: "Wiskunde-speletjies",
+    curriculumTopics: "Kurrikulum-onderwerpe",
+    searchPlaceholder: "Soek onderwerpe...",
+    topicsMastered: "Onderwerpe Bemeester",
+    formulaSheet: "Formuleblad & Sleutelreëls",
+    conceptBreakdown: "Konsep-verduideliking & Reëls",
+    workedExamples: "Stap-vir-Stap Uitgewerkte Voorbeelde",
+    showSolution: "Wys Stap-vir-Stap Oplossing",
+    hideSolution: "Versteek Oplossing",
+    aiTutorTitle: "KI-Stemonderwyser & Slim Verduideliker",
+    readAloudBtn: "Lees & Verduidelik Hardop",
+    pauseBtn: "Pouseer",
+    stopBtn: "Stop",
+    voiceSpeed: "Spoed:",
+    aiExtraBtn: "KI Ekstra Wenk & Nuwe Voorbeeld",
+    aiGenerating: "Gemini KI stel 'n vars verduideliking op...",
+    practiceTopicBtn: "Oefen Hierdie Onderwerp (+25 XP/Vraag)",
+    quizTitle: "Onderwerp-bemeesteringsvasvra",
+    questionLabel: "Vraag",
+    ofLabel: "van",
+    checkAnswer: "Kontroleer Antwoord",
+    nextQuestion: "Volgende Vraag",
+    finishQuiz: "Voltooi Vasvra",
+    correctMsg: "Kolskoot! Baie mooi!",
+    incorrectMsg: "Nie heeltemal nie — kyk na die stappe hieronder:",
+    quizCompleteTitle: "Vasvra Voltooi!",
+    tryAgain: "Oefen Weer",
+    backToLesson: "Terug na Les",
+    mockTestTitle: "KABV Tydgebonde Graad-proeftoets",
+    mockTestDesc: "Toets jou gereedheid oor alle onderwerpe vir jou gekose graad. Verdien tot +250 XP!",
+    startTestBtn: "Begin Tydgebonde Proeftoets (10 Vrae)",
+    submitTestBtn: "Handig Toets In",
+    timeLeft: "Tyd Oor:",
+    dailyTitle: "Daaglikse 3-Vraag Breinbreker",
+    dailyDesc: "Voltooi vandag se 3 blitsvrae vir 'n +100 XP daaglikse bonus!",
+    dailyDoneMsg: "Jy het vandag se Daaglikse Uitdaging voltooi! Kom môre terug of speel weer vir oefening.",
+    gamesTitle: "Interaktiewe Wiskunde-arkade",
+    gamesSubtitle: "Skerp jou hoofrekene, patroonherkenning en trigonometrie-instinkte op en verdien XP!",
+    playNow: "Speel Nou",
+    scoreLabel: "Telling",
+    comboLabel: "Kombo",
+    totalXpLabel: "Totale XP",
+    quizzesDoneLabel: "Vrae Opgelos",
+    gameBestLabel: "Beste Speletjietelling",
+    unlockedBadges: "Prestasies & Mylpale",
+    closeBtn: "Sluit",
+    gradeLabel: "Graad",
+    basicBadge: "Basies",
+    interBadge: "Intermediêr",
+    examBadge: "Eksamenvlak",
+    enterNumberPlaceholder: "Tik getal-antwoord...",
+    dirTitle: "Volledige Opsionele KABV-onderwerpgids",
+    dirSubtitle: "Blaai deur alle Graad 9–11 KABV-onderwerpe, merk dié waarop jy wil fokus, en begin 'n Pasgemaakte Onderwerp-vasvra.",
+    customMixBtn: "Oefen Geselekteerde Onderwerpe",
+    selectAllBtn: "Kies Alles in Graad",
+    clearSelBtn: "Maak Seleksie Skoon",
+    selectedCountLabel: "onderwerpe gekies",
+    papersTitle: "Moderne Skoolvraestelle & Memorandums (Kwartaal 1 – Kwartaal 4)",
+    papersSubtitle: "Outentieke KABV-skoolassesserings met puntetoekennings, interaktiewe eksamenmodus en stap-vir-stap nasienriglyne.",
+    term1Label: "Kwartaal 1 (Kontroletoets)",
+    term2Label: "Kwartaal 2 (Halfjaareksamen)",
+    term3Label: "Kwartaal 3 (Kontroletoets)",
+    term4Label: "Kwartaal 4 (Eindeksamen)",
+    memoModeBtn: "Vraestel & Memo Studiemodus",
+    interactiveExamBtn: "Doen Interaktiewe Eksamen (+XP)",
+    showMemoBtn: "Wys Stap-vir-Stap Memo",
+    hideMemoBtn: "Versteek Memo",
+    marksLabel: "punte",
+    totalMarksLabel: "Totale Punte",
+    durationLabel: "Tydsduur",
+    instructionsHeader: "INSTRUKSIES EN INLIGTING",
+    listenMemoBtn: "KI-Stem Memo-deurloop"
+  }
+};
+
+// ============================================================================
+// 2. COMPREHENSIVE GRADE 9 - 11 CAPS CURRICULUM DATABASE (BILINGUAL)
+// ============================================================================
+const CURRICULUM = [
+  // ======================= GRADE 9 =======================
+  {
+    id: "g9-numbers",
+    grade: 9,
+    term: 1,
+    icon: "fa-hashtag",
+    title: { en: "Whole Numbers, Integers & Exponents", af: "Heelgetalle, Heelgetalle (Negatief) & Eksponente" },
+    formulas: [
+      { expr: "aᵐ × aⁿ = aᵐ⁺ⁿ   |   aᵐ ÷ aⁿ = aᵐ⁻ⁿ", desc: { en: "Product & Quotient Laws of Exponents", af: "Vermenigvuldigings- & Delingswette van Eksponente" } },
+      { expr: "(aᵐ)ⁿ = aᵐⁿ   |   a⁻ⁿ = 1/aⁿ   |   a⁰ = 1", desc: { en: "Power, Negative & Zero Exponents", af: "Mag-, Negatiewe & Nul-eksponente" } },
+      { expr: "HCF & LCM via Prime Factorisation", desc: { en: "Highest Common Factor & Lowest Common Multiple", af: "GGF & KGV via Priemfaktorisering" } }
+    ],
+    explanation: {
+      en: "In Grade 9 Term 1, we master integer operations, prime factorisation for HCF/LCM, scientific notation, and exponential laws including negative exponents. Always apply BODMAS and remember that (-a)² = +a² whereas -a² = -(a²).",
+      af: "In Graad 9 Kwartaal 1 bemeester ons heelgetal-bewerkings, priemfaktorisering vir GGF/KGV, wetenskaplike notasie, en eksponentwette insluitend negatiewe eksponente. Pas altyd BODMAS toe en onthou (-a)² = +a² terwyl -a² = -(a²)."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Simplify: (-3)² - 2³ + 5⁰", af: "Vereenvoudig: (-3)² - 2³ + 5⁰" },
+        steps: {
+          en: ["(-3)² = +9; 2³ = 8; 5⁰ = 1", "Substitute: 9 - 8 + 1 = 2"],
+          af: ["(-3)² = +9; 2³ = 8; 5⁰ = 1", "Vervang in: 9 - 8 + 1 = 2"]
+        }
+      },
+      {
+        level: "intermediate",
+        problem: { en: "Simplify with positive exponents: (6x³y⁻²) / (2x⁵y⁻¹)", af: "Vereenvoudig met positiewe eksponente: (6x³y⁻²) / (2x⁵y⁻¹)" },
+        steps: {
+          en: ["Divide coefficients: 6 ÷ 2 = 3", "Subtract exponents: 3 · x³⁻⁵ · y⁻²⁻⁽⁻¹⁾ = 3x⁻²y⁻¹", "Write with positive exponents: 3 / (x²y)"],
+          af: ["Deel koëffisiënte: 6 ÷ 2 = 3", "Trek eksponente af: 3 · x³⁻⁵ · y⁻²⁻⁽⁻¹⁾ = 3x⁻²y⁻¹", "Skryf met positiewe eksponente: 3 / (x²y)"]
+        }
+      },
+      {
+        level: "exam",
+        problem: { en: "Calculate in scientific notation: (4 × 10⁵) × (3 × 10⁻²)", af: "Bereken in wetenskaplike notasie: (4 × 10⁵) × (3 × 10⁻²)" },
+        steps: {
+          en: ["Multiply numbers and add powers of 10: 12 × 10³", "Adjust to proper scientific notation (1 ≤ a < 10): 1,2 × 10⁴"],
+          af: ["Vermenigvuldig getalle en tel magte van 10 op: 12 × 10³", "Pas aan na korrekte wetenskaplike notasie (1 ≤ a < 10): 1,2 × 10⁴"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Simplify: (-2)³ + 4⁰", af: "Vereenvoudig: (-2)³ + 4⁰" },
+        type: "number",
+        answer: -7,
+        solution: { en: "(-2)³ = -8 and 4⁰ = 1, so -8 + 1 = -7.", af: "(-2)³ = -8 en 4⁰ = 1, dus -8 + 1 = -7." }
+      },
+      {
+        q: { en: "Simplify: (2x²)³", af: "Vereenvoudig: (2x²)³" },
+        options: ["8x⁶", "6x⁵", "8x⁵", "2x⁶"],
+        answer: 0,
+        solution: { en: "2³ · (x²)³ = 8x⁶.", af: "2³ · (x²)³ = 8x⁶." }
+      }
+    ]
+  },
+  {
+    id: "g9-algebra",
+    grade: 9,
+    term: 2,
+    icon: "fa-superscript",
+    title: { en: "Algebraic Expressions & Factorisation", af: "Algebraïese Uitdrukkings & Faktorisering" },
+    formulas: [
+      { expr: "a(b + c) = ab + ac", desc: { en: "Distributive Law", af: "Distributiewe Wet" } },
+      { expr: "(a + b)(a - b) = a² - b²", desc: { en: "Difference of Two Squares (DOTS)", af: "Verskil van Twee Vierkante" } },
+      { expr: "(a ± b)² = a² ± 2ab + b²", desc: { en: "Squaring a Binomial", af: "Kwadreer van 'n Tweeterm" } },
+      { expr: "x² + (p + q)x + pq = (x + p)(x + q)", desc: { en: "Quadratic Trinomial Factorisation", af: "Faktorisering van Drieterm" } }
+    ],
+    explanation: {
+      en: "In Grade 9 Algebra, we expand products of binomials using FOIL (First, Outer, Inner, Last) and reverse the process through factorisation. Always look for a Highest Common Factor (HCF) first before applying Difference of Two Squares or Trinomial factorisation.",
+      af: "In Graad 9 Algebra brei ons produkte van tweeterm-uitdrukkings uit en keer die proses om deur faktorisering. Soek altyd eers vir 'n Grootste Gemene Faktor (GGF) voordat jy Verskil van Twee Vierkante of Drieterm-faktorisering toepas."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Expand and simplify: (2x - 3)(x + 4)", af: "Brei uit en vereenvoudig: (2x - 3)(x + 4)" },
+        steps: {
+          en: [
+            "Apply FOIL: Multiply First terms: 2x · x = 2x²",
+            "Outer terms: 2x · 4 = 8x; Inner terms: -3 · x = -3x",
+            "Last terms: -3 · 4 = -12",
+            "Combine like terms: 2x² + 8x - 3x - 12 = 2x² + 5x - 12"
+          ],
+          af: [
+            "Pas FOIL toe: Vermenigvuldig Eerste terme: 2x · x = 2x²",
+            "Buitenste terme: 2x · 4 = 8x; Binneste terme: -3 · x = -3x",
+            "Laaste terme: -3 · 4 = -12",
+            "Tel gelyksoortige terme saam: 2x² + 8x - 3x - 12 = 2x² + 5x - 12"
+          ]
+        }
+      },
+      {
+        level: "intermediate",
+        problem: { en: "Factorise completely: 3x² - 27", af: "Faktoriseer volledig: 3x² - 27" },
+        steps: {
+          en: [
+            "Step 1: Take out the Highest Common Factor (HCF), which is 3: 3(x² - 9)",
+            "Step 2: Recognise (x² - 9) as Difference of Two Squares (x² - 3²)",
+            "Final Answer: 3(x - 3)(x + 3)"
+          ],
+          af: [
+            "Stap 1: Haal die Grootste Gemene Faktor (GGF) uit, naamlik 3: 3(x² - 9)",
+            "Stap 2: Herken (x² - 9) as Verskil van Twee Vierkante (x² - 3²)",
+            "Finale Antwoord: 3(x - 3)(x + 3)"
+          ]
+        }
+      },
+      {
+        level: "exam",
+        problem: { en: "Factorise completely: 2x² - 10x + 12", af: "Faktoriseer volledig: 2x² - 10x + 12" },
+        steps: {
+          en: [
+            "Take out HCF of 2: 2(x² - 5x + 6)",
+            "Find two numbers that multiply to +6 and add to -5: (-2 and -3)",
+            "Final Answer: 2(x - 2)(x - 3)"
+          ],
+          af: [
+            "Haal GGF van 2 uit: 2(x² - 5x + 6)",
+            "Soek twee getalle wat vermenigvuldig +6 gee en opgetel -5 gee: (-2 en -3)",
+            "Finale Antwoord: 2(x - 2)(x - 3)"
+          ]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Factorise completely: x² - 49", af: "Faktoriseer volledig: x² - 49" },
+        options: ["(x - 7)(x + 7)", "(x - 7)²", "(x - 49)(x + 1)", "(x + 7)²"],
+        answer: 0,
+        solution: { en: "x² - 49 = x² - 7² = (x - 7)(x + 7) using Difference of Two Squares.", af: "x² - 49 = x² - 7² = (x - 7)(x + 7) deur Verskil van Twee Vierkante." }
+      },
+      {
+        q: { en: "Expand: (x - 5)²", af: "Brei uit: (x - 5)²" },
+        options: ["x² - 25", "x² + 25", "x² - 10x + 25", "x² - 5x + 25"],
+        answer: 2,
+        solution: { en: "(x - 5)(x - 5) = x² - 5x - 5x + 25 = x² - 10x + 25.", af: "(x - 5)(x - 5) = x² - 5x - 5x + 25 = x² - 10x + 25." }
+      },
+      {
+        q: { en: "Factorise: x² + 5x - 14", af: "Faktoriseer: x² + 5x - 14" },
+        options: ["(x + 7)(x - 2)", "(x - 7)(x + 2)", "(x + 14)(x - 1)", "(x - 7)(x - 2)"],
+        answer: 0,
+        solution: { en: "+7 × (-2) = -14 and +7 + (-2) = +5, so (x + 7)(x - 2).", af: "+7 × (-2) = -14 en +7 + (-2) = +5, dus (x + 7)(x - 2)." }
+      }
+    ]
+  },
+  {
+    id: "g9-equations",
+    grade: 9,
+    term: 2,
+    icon: "fa-equals",
+    title: { en: "Linear & Quadratic Equations (by Factorisation)", af: "Lineêre & Kwadratiese Vergelykings (deur Faktorisering)" },
+      { expr: "ax + b = c  ⇒  x = (c - b)/a", desc: { en: "Standard Linear Equation", af: "Standaard Lineêre Vergelyking" } },
+      { expr: "If -ax > b  ⇒  x < -b/a", desc: { en: "Flip inequality sign when dividing by negative", af: "Draai ongelykheidsteken om as jy deur negatief deel" } }
+    ],
+    explanation: {
+      en: "Solving equations means isolating the unknown variable (x) by applying inverse operations equally to both sides. For fractions, multiply every term by the Lowest Common Denominator (LCD). For inequalities, remember the golden rule: multiplying or dividing by a negative number reverses the inequality sign!",
+      af: "Om vergelykings op te los beteken om die onbekende (x) te isoleer deur omgekeerde bewerkings aan beide kante te doen. Vir breuke, vermenigvuldig elke term met die Kleinste Gemene Veeloud (KGV). Vir ongelykhede: as jy deur 'n negatiewe getal deel of vermenigvuldig, draai die ongelykheidsteken om!"
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Solve for x: 3(2x - 1) = 4x + 7", af: "Los op vir x: 3(2x - 1) = 4x + 7" },
+        steps: {
+          en: ["Expand brackets: 6x - 3 = 4x + 7", "Subtract 4x from both sides: 2x - 3 = 7", "Add 3 to both sides: 2x = 10 ⇒ x = 5"],
+          af: ["Brei hakies uit: 6x - 3 = 4x + 7", "Trek 4x af aan beide kante: 2x - 3 = 7", "Tel 3 by aan beide kante: 2x = 10 ⇒ x = 5"]
+        }
+      },
+      {
+        level: "intermediate",
+        problem: { en: "Solve for x: (x + 1)/2 - (x - 2)/3 = 2", af: "Los op vir x: (x + 1)/2 - (x - 2)/3 = 2" },
+        steps: {
+          en: ["Multiply all terms by LCD = 6: 3(x + 1) - 2(x - 2) = 12", "Expand carefully: 3x + 3 - 2x + 4 = 12", "Simplify: x + 7 = 12 ⇒ x = 5"],
+          af: ["Vermenigvuldig alle terme met KGV = 6: 3(x + 1) - 2(x - 2) = 12", "Brei versigtig uit: 3x + 3 - 2x + 4 = 12", "Vereenvoudig: x + 7 = 12 ⇒ x = 5"]
+        }
+      },
+      {
+        level: "exam",
+        problem: { en: "Solve for x: -3x + 5 ≤ 17", af: "Los op vir x: -3x + 5 ≤ 17" },
+        steps: {
+          en: ["Subtract 5 from both sides: -3x ≤ 12", "Divide by -3 AND flip the inequality sign: x ≥ -4"],
+          af: ["Trek 5 af aan beide kante: -3x ≤ 12", "Deel deur -3 EN draai die teken om: x ≥ -4"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Solve for x: 5x - 8 = 2x + 13", af: "Los op vir x: 5x - 8 = 2x + 13" },
+        type: "number",
+        answer: 7,
+        solution: { en: "5x - 2x = 13 + 8 ⇒ 3x = 21 ⇒ x = 7.", af: "5x - 2x = 13 + 8 ⇒ 3x = 21 ⇒ x = 7." }
+      },
+      {
+        q: { en: "Solve: -2x > 10", af: "Los op: -2x > 10" },
+        options: ["x > -5", "x < -5", "x > 5", "x < 5"],
+        answer: 1,
+        solution: { en: "Dividing both sides by -2 flips > to <, giving x < -5.", af: "Deel beide kante deur -2 draai > om na <, so x < -5." }
+      }
+    ]
+  },
+  {
+    id: "g9-patterns",
+    grade: 9,
+    term: 1,
+    icon: "fa-arrow-trend-up",
+    title: { en: "Numeric & Geometric Patterns", af: "Getal- & Meetkundige Patrone" },
+    formulas: [
+      { expr: "Tₙ = a + (n - 1)d", desc: { en: "General term of linear sequence (a = T₁, d = common difference)", af: "Algemene term van lineêre ry (a = T₁, d = gemene verskil)" } },
+      { expr: "d = T₂ - T₁ = T₃ - T₂", desc: { en: "Constant First Difference", af: "Konstante Eerste Verskil" } }
+    ],
+    explanation: {
+      en: "A linear number pattern increases or decreases by a constant difference (d). To find the general rule Tₙ, find d = T₂ - T₁, then substitute T₁ = a into Tₙ = dn + c or use Tₙ = a + (n - 1)d.",
+      af: "'n Lineêre getalpatroon vermeerder of verminder met 'n konstante verskil (d). Om die algemene reël Tₙ te kry, bereken d = T₂ - T₁ en gebruik Tₙ = a + (n - 1)d."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Find the 20th term of: 4; 9; 14; 19; ...", af: "Bepaal die 20ste term van: 4; 9; 14; 19; ..." },
+        steps: {
+          en: ["a = 4, d = 9 - 4 = 5", "Tₙ = 4 + (n - 1)(5) = 5n - 1", "T₂₀ = 5(20) - 1 = 99"],
+          af: ["a = 4, d = 9 - 4 = 5", "Tₙ = 4 + (n - 1)(5) = 5n - 1", "T₂₀ = 5(20) - 1 = 99"]
+        }
+      },
+      {
+        level: "exam",
+        problem: { en: "Which term in 18; 14; 10; ... equals -70?", af: "Watter term in 18; 14; 10; ... is gelyk aan -70?" },
+        steps: {
+          en: ["a = 18, d = -4 ⇒ Tₙ = 18 + (n - 1)(-4) = -4n + 22", "Set -4n + 22 = -70 ⇒ -4n = -92 ⇒ n = 23 (23rd term)"],
+          af: ["a = 18, d = -4 ⇒ Tₙ = 18 + (n - 1)(-4) = -4n + 22", "Stel -4n + 22 = -70 ⇒ -4n = -92 ⇒ n = 23 (23ste term)"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Find T₁₅ for the sequence: 3; 7; 11; 15; ...", af: "Bepaal T₁₅ vir die ry: 3; 7; 11; 15; ..." },
+        type: "number",
+        answer: 59,
+        solution: { en: "Tₙ = 4n - 1. So T₁₅ = 4(15) - 1 = 59.", af: "Tₙ = 4n - 1. Dus T₁₅ = 4(15) - 1 = 59." }
+      }
+    ]
+  },
+  {
+    id: "g9-functions",
+    grade: 9,
+    term: 3,
+    icon: "fa-chart-line",
+    title: { en: "Functions, Relationships & Straight Line Graphs", af: "Funksies, Verwantskappe & Reguitlyngrafieke" },
+      { expr: "y = mx + c", desc: { en: "Standard Form of Straight Line (m = gradient, c = y-intercept)", af: "Standaardvorm van Reguitlyn (m = gradiënt, c = y-afsnit)" } },
+      { expr: "m = (y₂ - y₁)/(x₂ - x₁)", desc: { en: "Gradient Formula", af: "Gradiëntformule" } }
+    ],
+    explanation: {
+      en: "A linear graph is determined by its gradient m (steepness & direction: m > 0 slopes up, m < 0 slopes down) and its y-intercept c (where x = 0). To find the x-intercept, set y = 0 and solve for x.",
+      af: "'n Lineêre grafiek word bepaal deur sy gradiënt m (helling: m > 0 styg, m < 0 daal) en sy y-afsnit c (waar x = 0). Om die x-afsnit te kry, stel y = 0 en los op vir x."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "Find the equation of the line through (0; -3) and (2; 5).", af: "Bepaal die vergelyking van die lyn deur (0; -3) en (2; 5)." },
+        steps: {
+          en: ["y-intercept c = -3 (since x = 0)", "Gradient m = (5 - (-3))/(2 - 0) = 8/2 = 4", "Equation: y = 4x - 3"],
+          af: ["y-afsnit c = -3 (want x = 0)", "Gradiënt m = (5 - (-3))/(2 - 0) = 8/2 = 4", "Vergelyking: y = 4x - 3"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "What is the gradient of the line 2y - 6x = 8?", af: "Wat is die gradiënt van die lyn 2y - 6x = 8?" },
+        type: "number",
+        answer: 3,
+        solution: { en: "Rewrite in standard form: 2y = 6x + 8 ⇒ y = 3x + 4. Gradient m = 3.", af: "Skryf in standaardvorm: 2y = 6x + 8 ⇒ y = 3x + 4. Gradiënt m = 3." }
+      }
+    ]
+  },
+  {
+    id: "g9-geometry",
+    grade: 9,
+    term: 2,
+    icon: "fa-shapes",
+    title: { en: "Geometry of Straight Lines, 2D Shapes & Pythagoras", af: "Meetkunde van Reguitlyne, 2D-vorms & Pythagoras" },
+      { expr: "c² = a² + b²", desc: { en: "Theorem of Pythagoras (right-angled triangles)", af: "Stelling van Pythagoras (reghoekige driehoeke)" } },
+      { expr: "A = πr²   |   C = 2πr", desc: { en: "Area & Circumference of a Circle", af: "Oppervlakte & Omtrek van 'n Sirkel" } },
+      { expr: "V = l × b × h   |   V = πr²h", desc: { en: "Volume of Rectangular Prism & Cylinder", af: "Volume van Reghoekige Prisma & Silinder" } }
+    ],
+    explanation: {
+      en: "Key Euclidean Geometry reasons in Grade 9: Angles on a straight line add to 180°; Vertically opposite angles are equal; Corresponding & Alternate angles on parallel lines are equal; Co-interior angles add to 180°; Interior angles of a triangle add to 180°.",
+      af: "Belangrike Euklidiese Meetkunde-redes in Graad 9: Hoeke op 'n reguitlyn = 180°; Regoorstaande hoeke is gelyk; Ooreenkomstige & Verwisselende hoeke by ewewydige lyne is gelyk; Ko-binnehoeke = 180°; Binnehoeke van 'n driehoek = 180°."
+    },
+    examples: [
+      {
+    id: "g9-measurement",
+    grade: 9,
+    term: 3,
+    icon: "fa-cube",
+    title: { en: "Area, Perimeter, Surface Area & Volume", af: "Oppervlakte, Omtrek, Buite-oppervlakte & Volume" },
+    formulas: [
+      { expr: "A = πr²   |   C = 2πr", desc: { en: "Circle Area & Circumference", af: "Sirkel Oppervlakte & Omtrek" } },
+      { expr: "SA = 2(lb + lh + bh)   |   V = l × b × h", desc: { en: "Rectangular Prism Surface Area & Volume", af: "Reghoekige Prisma Buite-oppervlakte & Volume" } },
+      { expr: "SA = 2πr² + 2πrh   |   V = πr²h", desc: { en: "Closed Cylinder Surface Area & Volume", af: "Geslote Silinder Buite-oppervlakte & Volume" } }
+    ],
+    explanation: {
+      en: "Always convert units BEFORE substituting into formulas (e.g., 1 m = 100 cm; 1 cm³ = 1 ml; 1 000 cm³ = 1 litre). Volume measures 3D capacity (units³), whereas Surface Area sums the 2D areas of all outer faces (units²).",
+      af: "Skakel altyd eenhede om VOORDAT jy in formules invervang (bv. 1 m = 100 cm; 1 cm³ = 1 ml; 1 000 cm³ = 1 liter). Volume meet 3D-kapasiteit (eenhede³), terwyl Buite-oppervlakte die 2D-oppervlaktes van alle vlakke optel (eenhede²)."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Find the volume of a cylinder with radius 7 cm and height 10 cm (use π ≈ 22/7).", af: "Bereken die volume van 'n silinder met radius 7 cm en hoogte 10 cm (gebruik π ≈ 22/7)." },
+        steps: {
+          en: ["V = πr²h = (22/7) × 7² × 10", "V = 22 × 7 × 10 = 1 540 cm³"],
+          af: ["V = πr²h = (22/7) × 7² × 10", "V = 22 × 7 × 10 = 1 540 cm³"]
+        }
+      },
+      {
+        level: "exam",
+        problem: { en: "A rectangular tank measures 50 cm × 40 cm × 30 cm. How many litres of water can it hold?", af: "'n Reghoekige tenk meet 50 cm × 40 cm × 30 cm. Hoeveel liter water kan dit hou?" },
+        steps: {
+          en: ["V = 50 × 40 × 30 = 60 000 cm³", "Divide by 1 000 to convert cm³ to litres: 60 000 ÷ 1 000 = 60 litres"],
+          af: ["V = 50 × 40 × 30 = 60 000 cm³", "Deel deur 1 000 om cm³ na liter om te skakel: 60 000 ÷ 1 000 = 60 liter"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "A cube has side length 4 cm. What is its total surface area in cm²?", af: "'n Kubus het sylengte 4 cm. Wat is sy totale buite-oppervlakte in cm²?" },
+        type: "number",
+        answer: 96,
+        solution: { en: "A cube has 6 square faces: SA = 6 × s² = 6 × 16 = 96 cm².", af: "'n Kubus het 6 vierkantige vlakke: BO = 6 × s² = 6 × 16 = 96 cm²." }
+      }
+    ]
+  },
+  {
+    id: "g9-data-prob",
+    grade: 9,
+    term: 4,
+    icon: "fa-chart-pie",
+    title: { en: "Data Handling & Probability", af: "Datahantering & Waarskynlikheid" },
+    formulas: [
+      { expr: "Mean (x̄) = Σx / n   |   Range = Max - Min", desc: { en: "Measures of Central Tendency & Dispersion", af: "Maatstawwe van Sentrale Neiging & Verspreiding" } },
+      { expr: "P(E) = n(E) / n(S)", desc: { en: "Theoretical Probability (0 ≤ P(E) ≤ 1)", af: "Teoretiese Waarskynlikheid (0 ≤ P(E) ≤ 1)" } }
+    ],
+    explanation: {
+      en: "Always arrange data from smallest to largest before finding the Median (middle value) or Interquartile Range (IQR = Q₃ - Q₁). For compound probability without replacement, remember the total outcomes decrease by 1 on the second draw!",
+      af: "Rangskik altyd data van klein na groot voordat jy die Mediaan (middelste waarde) of Interkwartielvariasiewydte (IKV = Q₃ - Q₁) bepaal. By saamgestelde waarskynlikheid sonder terugplasing verminder die totale uitkomste met 1!"
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Find the median and mean of: 12; 5; 8; 15; 10", af: "Bepaal die mediaan en gemiddelde van: 12; 5; 8; 15; 10" },
+        steps: {
+          en: ["Sort ascending: 5; 8; 10; 12; 15 ⇒ Median = 10", "Mean = (5 + 8 + 10 + 12 + 15) ÷ 5 = 50 ÷ 5 = 10"],
+          af: ["Rangskik stygend: 5; 8; 10; 12; 15 ⇒ Mediaan = 10", "Gemiddelde = (5 + 8 + 10 + 12 + 15) ÷ 5 = 50 ÷ 5 = 10"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "A bag has 3 red and 5 blue marbles. What is the probability of picking a red marble?", af: "'n Sak het 3 rooi en 5 blou albasters. Wat is die waarskynlikheid om 'n rooi albaster te trek?" },
+        options: ["3/8", "3/5", "5/8", "1/3"],
+        answer: 0,
+        solution: { en: "Total marbles = 3 + 5 = 8. P(Red) = 3/8.", af: "Totale albasters = 3 + 5 = 8. P(Rooi) = 3/8." }
+      }
+    ]
+  },
+
+  // ======================= GRADE 10 =======================
+  {
+    id: "g10-algebra",
+    grade: 10,
+    term: 1,
+    icon: "fa-square-root-variable",
+    title: { en: "Algebraic Expressions, Factorisation & Fractions", af: "Algebraïese Uitdrukkings, Faktorisering & Breuke" },
+    formulas: [
+      { expr: "a³ + b³ = (a + b)(a² - ab + b²)", desc: { en: "Sum of Two Cubes", af: "Som van Twee Derdemagte" } },
+      { expr: "a³ - b³ = (a - b)(a² + ab + b²)", desc: { en: "Difference of Two Cubes", af: "Verskil van Twee Derdemagte" } },
+      { expr: "ab + ac + db + dc = a(b + c) + d(b + c) = (b + c)(a + d)", desc: { en: "Factorisation by Grouping", af: "Faktorisering deur Groepering" } }
+    ],
+    explanation: {
+      en: "Grade 10 expands factorisation to include Sum & Difference of Cubes (remember SOAP: Same, Opposite, Always Positive signs) and Grouping in pairs. To simplify algebraic fractions, factorise all numerators and denominators completely before cancelling common factors.",
+      af: "Graad 10 brei faktorisering uit na Som & Verskil van Derdemagte (onthou SOAP: Dieselfde, Teenoorgestelde, Altyd Positiewe tekens) en Groepering. Om algebraïese breuke te vereenvoudig, faktoriseer tellers en noemers volledig."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Factorise completely: x³ - 8", af: "Faktoriseer volledig: x³ - 8" },
+        steps: {
+          en: ["Rewrite as x³ - 2³", "Apply difference of cubes: (x - 2)(x² + 2x + 4)"],
+          af: ["Skryf as x³ - 2³", "Pas verskil van derdemagte toe: (x - 2)(x² + 2x + 4)"]
+        }
+      },
+      {
+        level: "exam",
+        problem: { en: "Simplify: (x² - 9) / (x² + 5x + 6)", af: "Vereenvoudig: (x² - 9) / (x² + 5x + 6)" },
+        steps: {
+          en: ["Factorise numerator (DOTS): (x - 3)(x + 3)", "Factorise denominator: (x + 3)(x + 2)", "Cancel (x + 3): (x - 3) / (x + 2)"],
+          af: ["Faktoriseer teller: (x - 3)(x + 3)", "Faktoriseer noemer: (x + 3)(x + 2)", "Kanselleer (x + 3): (x - 3) / (x + 2)"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Factorise: x³ + 27", af: "Faktoriseer: x³ + 27" },
+        options: ["(x + 3)(x² - 3x + 9)", "(x + 3)(x² + 3x + 9)", "(x - 3)(x² + 3x + 9)", "(x + 3)³"],
+        answer: 0,
+        solution: { en: "x³ + 3³ = (x + 3)(x² - 3x + 9).", af: "x³ + 3³ = (x + 3)(x² - 3x + 9)." }
+      }
+    ]
+  },
+  {
+    id: "g10-exponents",
+    grade: 10,
+    term: 1,
+    icon: "fa-superscript",
+    title: { en: "Exponents & Exponential Equations", af: "Eksponente & Eksponensiële Vergelykings" },
+    formulas: [
+      { expr: "aᵐ · aⁿ = aᵐ⁺ⁿ   |   aᵐ ÷ aⁿ = aᵐ⁻ⁿ", desc: { en: "Product & Quotient Laws", af: "Vermenigvuldigings- & Delingswette" } },
+      { expr: "(aᵐ)ⁿ = aᵐⁿ   |   a⁻ⁿ = 1/aⁿ   |   a⁰ = 1", desc: { en: "Power, Negative & Zero Exponent Laws", af: "Mag-, Negatiewe & Nul-eksponentwette" } }
+    ],
+    explanation: {
+      en: "To simplify complex exponential fractions, break composite bases into prime factors (e.g., 6 = 2·3, 9 = 3², 8 = 2³). If there are + or - signs in the numerator/denominator, factorise by taking out a common exponential factor!",
+      af: "Om eksponensiële breuke te vereenvoudig, ontbind saamgestelde basisse in priemfaktore (bv. 6 = 2·3, 9 = 3², 8 = 2³). As daar + of - tekens is, faktoriseer deur 'n gemene eksponensiële faktor uit te haal!"
+    },
+    examples: [
+      {
+    id: "g10-equations",
+    grade: 10,
+    term: 1,
+    icon: "fa-equals",
+    title: { en: "Equations, Simultaneous Equations & Inequalities", af: "Vergelykings, Gelyktydige Vergelykings & Ongelykhede" },
+    formulas: [
+      { expr: "ax² + bx + c = 0 ⇒ (px + q)(rx + s) = 0", desc: { en: "Zero-Factor Law for Quadratics", af: "Nul-faktorwet vir Kwadratiese Vergelykings" } },
+      { expr: "Simultaneous Linear: Substitution or Elimination", desc: { en: "2 Equations in 2 Unknowns (x and y)", af: "2 Vergelykings met 2 Onbekendes (x en y)" } }
+    ],
+    explanation: {
+      en: "In Grade 10, we solve quadratic equations by setting one side to zero and factorising, simultaneous linear equations (finding the point of intersection of two straight lines), and linear inequalities expressed in interval notation or on a number line.",
+      af: "In Graad 10 los ons kwadratiese vergelykings op deur een kant gelyk aan nul te stel en te faktoriseer, gelyktydige lineêre vergelykings (snypunt van twee lyne), en lineêre ongelykhede."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "Solve simultaneously: 2x + y = 7 and x - y = 2", af: "Los gelyktydig op: 2x + y = 7 en x - y = 2" },
+        steps: {
+          en: ["Add the two equations to eliminate y: (2x + x) + (y - y) = 7 + 2 ⇒ 3x = 9 ⇒ x = 3", "Substitute x = 3 into x - y = 2: 3 - y = 2 ⇒ y = 1"],
+          af: ["Tel die twee vergelykings op om y te elimineer: 3x = 9 ⇒ x = 3", "Vervang x = 3 in x - y = 2: 3 - y = 2 ⇒ y = 1"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Solve for x: x² - 3x - 10 = 0", af: "Los op vir x: x² - 3x - 10 = 0" },
+        options: ["x = 5 or x = -2", "x = -5 or x = 2", "x = 5 or x = 2", "x = 10 or x = -1"],
+        answer: 0,
+        solution: { en: "(x - 5)(x + 2) = 0 ⇒ x = 5 or x = -2.", af: "(x - 5)(x + 2) = 0 ⇒ x = 5 of x = -2." }
+      }
+    ]
+  },
+  {
+    id: "g10-functions",
+    grade: 10,
+    term: 2,
+    icon: "fa-wave-square",
+    title: { en: "Functions: Parabola, Hyperbola, Exponential & Trig", af: "Funksies: Parabool, Hiperbool, Eksponensieel & Trig" },
+      },
+      {
+        q: { en: "Simplify: (3²ˣ · 9ˣ) / 27ˣ", af: "Vereenvoudig: (3²ˣ · 9ˣ) / 27ˣ" },
+        options: ["3ˣ", "1", "3²ˣ", "9"],
+        answer: 0,
+        solution: { en: "(3²ˣ · 3²ˣ) / 3³ˣ = 3⁴ˣ / 3³ˣ = 3ˣ.", af: "(3²ˣ · 3²ˣ) / 3³ˣ = 3⁴ˣ / 3³ˣ = 3ˣ." }
+      }
+    ]
+  },
+  {
+    id: "g10-functions",
+    grade: 10,
+    icon: "fa-wave-square",
+    title: { en: "Functions: Parabola, Hyperbola & Exponential", af: "Funksies: Parabool, Hiperbool & Eksponensieel" },
+    formulas: [
+      { expr: "f(x) = ax² + q", desc: { en: "Grade 10 Parabola (Turning point: (0; q))", af: "Graad 10 Parabool (Draaipunt: (0; q))" } },
+      { expr: "g(x) = a/x + q", desc: { en: "Grade 10 Hyperbola (Asymptotes: x = 0, y = q)", af: "Graad 10 Hiperbool (Asimptote: x = 0, y = q)" } },
+      { expr: "h(x) = a·bˣ + q  (b > 0, b ≠ 1)", desc: { en: "Exponential Graph (Horizontal asymptote: y = q)", af: "Eksponensiële Grafiek (Horisontale asimptoot: y = q)" } }
+    ],
+    explanation: {
+      en: "In Grade 10, 'q' shifts every graph vertically up (q > 0) or down (q < 0). For a parabola y = ax² + q, a > 0 gives a minimum turning point (smiling), while a < 0 gives a maximum (frowning). For a hyperbola y = a/x + q, a > 0 places branches in Quadrants 1 & 3.",
+      af: "In Graad 10 skuif 'q' elke grafiek vertikaal op (q > 0) of af (q < 0). Vir 'n parabool y = ax² + q gee a > 0 'n minimum draaipunt, en a < 0 'n maksimum. Vir 'n hiperbool y = a/x + q plaas a > 0 die takke in Kwadrante 1 & 3."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "Given f(x) = 2x² - 8. Find the turning point and x-intercepts.", af: "Gegee f(x) = 2x² - 8. Bepaal die draaipunt en x-afsnitte." },
+        steps: {
+          en: [
+            "Turning point is (0; q) = (0; -8)",
+            "For x-intercepts, set y = 0: 2x² - 8 = 0 ⇒ x² = 4 ⇒ x = ±2",
+            "x-intercepts: (-2; 0) and (2; 0)"
+          ],
+          af: [
+            "Draaipunt is (0; q) = (0; -8)",
+            "Vir x-afsnitte, stel y = 0: 2x² - 8 = 0 ⇒ x² = 4 ⇒ x = ±2",
+            "x-afsnitte: (-2; 0) en (2; 0)"
+          ]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "What is the horizontal asymptote of g(x) = 4/x - 5?", af: "Wat is die horisontale asimptoot van g(x) = 4/x - 5?" },
+        options: ["y = -5", "y = 4", "x = -5", "y = 5"],
+        answer: 0,
+        solution: { en: "In y = a/x + q, the horizontal asymptote is y = q, so y = -5.", af: "In y = a/x + q is die horisontale asimptoot y = q, dus y = -5." }
+      }
+    ]
+  },
+  {
+    id: "g10-trig",
+    grade: 10,
+    term: 2,
+    icon: "fa-drafting-compass",
+    title: { en: "Trigonometry & Special Angles", af: "Trigonometrie & Spesiale Hoeke" },
+    formulas: [
+      { expr: "sin θ = Opp/Hyp   |   cos θ = Adj/Hyp   |   tan θ = Opp/Adj", desc: { en: "SOH CAH TOA in Right-Angled Triangles", af: "SOH CAH TOA in Reghoekige Driehoeke" } },
+      { expr: "sin 30° = ½   |   cos 60° = ½   |   tan 45° = 1", desc: { en: "Key Special Angle Values", af: "Belangrike Spesiale Hoekwaardes" } }
+    ],
+    explanation: {
+      en: "Trigonometry connects the angles of a right-angled triangle to the ratios of its sides. Always label Opposite (across from θ), Adjacent (next to θ), and Hypotenuse (opposite 90°). Remember reciprocals: cosec θ = 1/sin θ, sec θ = 1/cos θ, cot θ = 1/tan θ.",
+      af: "Trigonometrie verbind die hoeke van 'n reghoekige driehoek met die verhoudings van sy sye. Merk altyd Teenoorstaande (oorkant θ), Aangrensend (langs θ) en Skuinssy (oorkant 90°). Resiproke: kosek θ = 1/sin θ, sek θ = 1/cos θ, kot θ = 1/tan θ."
+    },
+    examples: [
+      {
+    id: "g10-euclidean",
+    grade: 10,
+    term: 2,
+    icon: "fa-draw-polygon",
+    title: { en: "Euclidean Geometry: Quadrilaterals & Midpoint Theorem", af: "Euklidiese Meetkunde: Vierhoeke & Middelpuntstelling" },
+    formulas: [
+      { expr: "Midpoint Theorem: DE ∥ BC and DE = ½BC", desc: { en: "Line joining midpoints of two sides of a triangle", af: "Lynstuk wat middelpunte van twee sye van 'n driehoek verbind" } },
+      { expr: "Parallelogram: Opp sides/angles =, diagonals bisect", desc: { en: "Properties of Special Quadrilaterals", af: "Eienskappe van Spesiale Vierhoeke" } }
+    ],
+    explanation: {
+      en: "Grade 10 Euclidean Geometry focuses on proving properties of Parallelograms, Rectangles, Rhombi, Squares, Trapezia, and Kites using Triangle Congruency (SSS, SAS, AAS, RHS) and the Midpoint Theorem.",
+      af: "Graad 10 Euklidiese Meetkunde fokus op eienskappe van Parallelogramme, Reghoeke, Ruite, Vierkante, Trapesiums en Vlieërs deur Kongruensie (SSS, SHS, HHS, RHS) en die Middelpuntstelling."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "In ΔABC, D and E are midpoints of AB and AC. If BC = 18 cm, find DE.", af: "In ΔABC is D en E middelpunte van AB en AC. As BC = 18 cm, bereken DE." },
+        steps: {
+          en: ["By the Midpoint Theorem, DE = ½BC", "DE = ½(18) = 9 cm"],
+          af: ["Volgens die Middelpuntstelling is DE = ½BC", "DE = ½(18) = 9 cm"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Which quadrilateral has diagonals that bisect each other at 90° and are equal in length?", af: "Watter vierhoek se hoeklyne halveer mekaar reghoekig (90°) en is ewe lank?" },
+        options: ["Square", "Rhombus", "Rectangle", "Parallelogram"],
+        answer: 0,
+        solution: { en: "A Square combines the properties of a rhombus (90° diagonals) and rectangle (equal diagonals).", af: "'n Vierkant kombineer die eienskappe van 'n ruit (90° hoeklyne) en reghoek (gelyke hoeklyne)." }
+      }
+    ]
+  },
+  {
+    id: "g10-analytical",
+    grade: 10,
+    term: 3,
+    icon: "fa-compass",
+    title: { en: "Analytical Geometry", af: "Analitiese Meetkunde" },
+    formulas: [
+      { expr: "d = √[(x₂ - x₁)² + (y₂ - y₁)²]", desc: { en: "Distance Between Two Points", af: "Afstand Tussen Twee Punte" } },
+      { expr: "M( (x₁ + x₂)/2 ; (y₁ + y₂)/2 )", desc: { en: "Midpoint of a Line Segment", af: "Middelpunt van 'n Lynstuk" } },
+      { expr: "m₁ = m₂ (Parallel)   |   m₁ × m₂ = -1 (Perpendicular)", desc: { en: "Parallel & Perpendicular Line Gradients", af: "Ewewydige & Loodregte Lyne se Gradiënte" } }
+    ],
+    explanation: {
+      en: "Analytical Geometry combines algebra with the Cartesian plane. Use the Distance formula to prove triangles are isosceles/equilateral, Midpoint to prove diagonals bisect each other (parallelogram), and Gradients to prove right angles (m₁ × m₂ = -1) or collinearity (m_AB = m_BC).",
+      af: "Analitiese Meetkunde kombineer algebra met die Cartesiese vlak. Gebruik die Afstandsformule om gelykbenige driehoeke te bewys, Middelpunt om te wys hoeklyne halveer mekaar, en Gradiënte vir loodregte lyne (m₁ × m₂ = -1) of saamlynige punte (m_AB = m_BC)."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "Find the distance between A(-1; 2) and B(3; 5).", af: "Bepaal die afstand tussen A(-1; 2) en B(3; 5)." },
+        steps: {
+          en: ["d = √[(3 - (-1))² + (5 - 2)²]", "d = √[4² + 3²] = √[16 + 9] = √25 = 5 units"],
+          af: ["d = √[(3 - (-1))² + (5 - 2)²]", "d = √[4² + 3²] = √[16 + 9] = √25 = 5 eenhede"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Line AB has gradient 2/3. What is the gradient of a line perpendicular to AB?", af: "Lyn AB het gradiënt 2/3. Wat is die gradiënt van 'n lyn loodreg op AB?" },
+        options: ["-3/2", "3/2", "-2/3", "2/3"],
+        answer: 0,
+        solution: { en: "Since m₁ × m₂ = -1, (2/3) × m₂ = -1 ⇒ m₂ = -3/2.", af: "Omdat m₁ × m₂ = -1, (2/3) × m₂ = -1 ⇒ m₂ = -3/2." }
+      }
+    ]
+  },
+  {
+    id: "g10-finance",
+    grade: 10,
+    term: 3,
+    icon: "fa-coins",
+    title: { en: "Financial Mathematics", af: "Finansiële Wiskunde" },
+    formulas: [
+      { expr: "A = P(1 + i·n)", desc: { en: "Simple Interest Formula (Hire Purchase)", af: "Enkelvoudige Rente Formule (Huurkoop)" } },
+      { expr: "A = P(1 + i)ⁿ", desc: { en: "Compound Interest Formula", af: "Saamgestelde Rente Formule" } }
+    ],
+    explanation: {
+      en: "Always convert the interest rate percentage into a decimal by dividing by 100 (e.g., 8% ⇒ i = 0,08). Simple interest calculates interest only on the original principal P, whereas Compound interest earns 'interest on interest' every period.",
+      af: "Skakel altyd die rentekoers-persentasie om na 'n desimaal deur deur 100 te deel (bv. 8% ⇒ i = 0,08). Enkelvoudige rente bereken rente slegs op die oorspronklike bedrag P, terwyl Saamgestelde rente 'rente op rente' verdien."
+    },
+    examples: [
+      {
+    id: "g10-stats-prob",
+    grade: 10,
+    term: 4,
+    icon: "fa-chart-bar",
+    title: { en: "Statistics (5-Number Summary) & Probability", af: "Statistiek (5-Getal-opsomming) & Waarskynlikheid" },
+    formulas: [
+      { expr: "IQR = Q₃ - Q₁   |   Semi-IQR = ½(Q₃ - Q₁)", desc: { en: "Interquartile Range & Box-and-Whisker", af: "Interkwartielvariasiewydte & Mond-en-snor" } },
+      { expr: "P(A or B) = P(A) + P(B) - P(A and B)", desc: { en: "Probability Addition Rule & Venn Diagrams", af: "Waarskynlikheid Optelreël & Venn-diagramme" } }
+    ],
+    explanation: {
+      en: "The Five-Number Summary consists of Minimum, Lower Quartile (Q₁), Median (Q₂), Upper Quartile (Q₃), and Maximum—visualised on a Box-and-Whisker diagram. In Probability, use Venn diagrams to organise overlapping events.",
+      af: "Die Vyfgetal-opsomming bestaan uit Minimum, Onderste Kwartiel (Q₁), Mediaan (Q₂), Boonste Kwartiel (Q₃) en Maksimum—voorgestel op 'n Mond-en-snordiagram."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Given Q₁ = 24 and Q₃ = 42, calculate the Interquartile Range (IQR).", af: "Gegee Q₁ = 24 en Q₃ = 42, bereken die Interkwartielvariasiewydte (IKV)." },
+        steps: {
+          en: ["IQR = Q₃ - Q₁ = 42 - 24 = 18"],
+          af: ["IKV = Q₃ - Q₁ = 42 - 24 = 18"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "If Q₁ = 15 and Q₃ = 31, what is the IQR?", af: "As Q₁ = 15 en Q₃ = 31, wat is die IKV?" },
+        type: "number",
+        answer: 16,
+        solution: { en: "IQR = 31 - 15 = 16.", af: "IKV = 31 - 15 = 16." }
+      }
+    ]
+  },
+
+  // ======================= GRADE 11 =======================
+  {
+    id: "g11-quadratics",
+    grade: 11,
+    term: 1,
+    icon: "fa-square-root-variable",
+    title: { en: "Quadratic Equations, Surds & Nature of Roots", af: "Kwadratiese Vergelykings, Wortelvorme & Aard van Wortels" },
+    formulas: [
+      { expr: "x = [ -b ± √(b² - 4ac) ] / 2a", desc: { en: "Quadratic Formula (when ax² + bx + c = 0)", af: "Kwadratiese Formule (wanneer ax² + bx + c = 0)" } },
+      { expr: "Δ = b² - 4ac", desc: { en: "Discriminant: Δ > 0 (Real, unequal), Δ = 0 (Equal), Δ < 0 (Non-real)", af: "Diskriminant: Δ > 0 (Reëel, ongelyk), Δ = 0 (Gelyk), Δ < 0 (Nie-reëel)" } }
+    ],
+    explanation: {
+      en: "In Grade 11, if a quadratic equation doesn't factorise easily (or asks for 'correct to 2 decimal places'), use the Quadratic Formula. When solving surd equations like x - √(x - 1) = 3, isolate the root first, square both sides, and ALWAYS check your answers in the original equation to reject extraneous (false) roots!",
+      af: "In Graad 11, as 'n kwadratiese vergelyking nie maklik faktoriseer nie (of vra 'korrek tot 2 desimale plekke'), gebruik die Kwadratiese Formule. By wortelvergelykings soos x - √(x - 1) = 3, isoleer die wortel eers, kwadreer beide kante, en TOETS ALTYD jou antwoorde om valse wortels te verwerp!"
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Solve for x: x - √(x - 1) = 3", af: "Los op vir x: x - √(x - 1) = 3" },
+        steps: {
+          en: [
+            "Isolate root: x - 3 = √(x - 1)",
+            "Square both sides: (x - 3)² = x - 1 ⇒ x² - 6x + 9 = x - 1",
+            "Standard form: x² - 7x + 10 = 0 ⇒ (x - 5)(x - 2) = 0 ⇒ x = 5 or x = 2",
+            "Check x = 2: 2 - √1 = 1 ≠ 3 (Reject x = 2). Check x = 5: 5 - √4 = 3 (Valid!). Answer: x = 5"
+          ],
+          af: [
+            "Isoleer wortel: x - 3 = √(x - 1)",
+            "Kwadreer beide kante: (x - 3)² = x - 1 ⇒ x² - 6x + 9 = x - 1",
+            "Standaardvorm: x² - 7x + 10 = 0 ⇒ (x - 5)(x - 2) = 0 ⇒ x = 5 of x = 2",
+            "Toets x = 2: 2 - √1 = 1 ≠ 3 (Verwerp x = 2). Toets x = 5: 5 - √4 = 3 (Geldig!). Antwoord: x = 5"
+          ]
+        }
+      },
+      {
+        level: "exam",
+        problem: { en: "For which values of k will 2x² - 4x + k = 0 have equal roots?", af: "Vir watter waardes van k sal 2x² - 4x + k = 0 gelyke wortels hê?" },
+        steps: {
+          en: [
+            "For equal roots, Discriminant Δ = b² - 4ac = 0",
+            "(-4)² - 4(2)(k) = 0 ⇒ 16 - 8k = 0",
+            "8k = 16 ⇒ k = 2"
+          ],
+          af: [
+            "Vir gelyke wortels is die Diskriminant Δ = b² - 4ac = 0",
+            "(-4)² - 4(2)(k) = 0 ⇒ 16 - 8k = 0",
+            "8k = 16 ⇒ k = 2"
+          ]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "If Δ = b² - 4ac = -9, what is the nature of the roots?", af: "As Δ = b² - 4ac = -9, wat is die aard van die wortels?" },
+        options: ["Non-real / Imaginary", "Real and equal", "Real, rational and unequal", "Real and irrational"],
+        answer: 0,
+        solution: { en: "Because Δ < 0 (-9 < 0), the square root of a negative number is non-real.", af: "Omdat Δ < 0 (-9 < 0), is die vierkantswortel van 'n negatiewe getal nie-reëel." }
+      },
+      {
+        q: { en: "Solve for x: x(x + 10) > -25", af: "Los op vir x: x(x + 10) > -25" },
+        options: ["x ∈ ℝ, x ≠ -5", "x > -5", "x < -5", "No real solution"],
+        answer: 0,
+        solution: { en: "x² + 10x + 25 > 0 ⇒ (x + 5)² > 0. A square is always > 0 except when x = -5.", af: "x² + 10x + 25 > 0 ⇒ (x + 5)² > 0. 'n Kwadraat is altyd > 0 behalwe waar x = -5." }
+      }
+    ]
+  },
+  {
+    id: "g11-patterns",
+    grade: 11,
+    term: 1,
+    icon: "fa-layer-group",
+    title: { en: "Quadratic Number Patterns", af: "Kwadratiese Getalpatrone" },
+    formulas: [
+      { expr: "Tₙ = an² + bn + c", desc: { en: "General Term of a Quadratic Sequence", af: "Algemene Term van 'n Kwadratiese Ry" } },
+      { expr: "2a = 2nd diff   |   3a + b = T₂ - T₁   |   a + b + c = T₁", desc: { en: "The 3 Golden Equations to find a, b, and c", af: "Die 3 Goue Vergelykings om a, b, en c te kry" } },
+      { expr: "n = -b / 2a", desc: { en: "Position of Minimum or Maximum Term", af: "Posisie van Minimum of Maksimum Term" } }
+    ],
+    explanation: {
+      en: "A quadratic number pattern has a CONSTANT second difference! Use the 3 bottom-up equations: (1) 2a = second difference, (2) 3a + b = first first-difference (T₂ - T₁), and (3) a + b + c = T₁. Remember that the first differences themselves form a linear pattern!",
+      af: "'n Kwadratiese getalpatroon het 'n KONSTANTE tweede verskil! Gebruik die 3 formules van onder na bo: (1) 2a = tweede verskil, (2) 3a + b = eerste eerste-verskil (T₂ - T₁), en (3) a + b + c = T₁. Onthou die eerste verskille self vorm 'n lineêre patroon!"
+    },
+    examples: [
+      {
+    id: "g11-functions",
+    grade: 11,
+    term: 2,
+    icon: "fa-wave-square",
+    title: { en: "Functions: Shifted Parabola, Hyperbola & Exponential", af: "Funksies: Geskuifde Parabool, Hiperbool & Eksponensieel" },
+    formulas: [
+      { expr: "f(x) = a(x + p)² + q   |   TP: (-p ; q)", desc: { en: "Turning Point Form of Parabola", af: "Draaipuntvorm van Parabool" } },
+      { expr: "g(x) = a / (x + p) + q   |   Asymp: x = -p, y = q", desc: { en: "Shifted Hyperbola", af: "Geskuifde Hiperbool" } },
+      { expr: "h(x) = a·bˣ⁺ᵖ + q   |   Asymp: y = q", desc: { en: "Shifted Exponential Function", af: "Geskuifde Eksponensiële Funksie" } }
+    ],
+    explanation: {
+      en: "In Grade 11, 'p' shifts graphs HORIZONTALLY in the opposite sign direction: (x + p) shifts p units LEFT, while (x - p) shifts p units RIGHT. 'q' shifts vertically up or down. For a parabola f(x) = ax² + bx + c, the axis of symmetry is x = -b / 2a.",
+      af: "In Graad 11 skuif 'p' grafieke HORISONTAAL in die teenoorgestelde rigting: (x + p) skuif p eenhede LINKS, en (x - p) skuif p eenhede REGS. 'q' skuif vertikaal op of af. Vir f(x) = ax² + bx + c is die simmetrie-as x = -b / 2a."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "Write down the turning point and range of f(x) = -2(x - 3)² + 8.", af: "Skryf die draaipunt en waardeversameling van f(x) = -2(x - 3)² + 8 neer." },
+        steps: {
+          en: ["Turning Point: (3; 8)", "Since a = -2 < 0 (maximum), Range is y ≤ 8 or y ∈ (-∞; 8]"],
+          af: ["Draaipunt: (3; 8)", "Omdat a = -2 < 0 (maksimum), is die Waardeversameling y ≤ 8 of y ∈ (-∞; 8]"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "What are the equations of the asymptotes of g(x) = 3 / (x + 2) - 4?", af: "Wat is die vergelykings van die asimptote van g(x) = 3 / (x + 2) - 4?" },
+        options: ["x = -2 and y = -4", "x = 2 and y = -4", "x = -2 and y = 4", "x = 3 and y = -4"],
+        answer: 0,
+        solution: { en: "Set denominator x + 2 = 0 ⇒ x = -2, and vertical shift y = -4.", af: "Stel noemer x + 2 = 0 ⇒ x = -2, en vertikale skuif y = -4." }
+      }
+    ]
+  },
+  {
+    id: "g11-trig",
+    grade: 11,
+    term: 2,
+    icon: "fa-circle-nodes",
+    title: { en: "Trig Identities, Reduction & Sine/Cosine Rules", af: "Trig-identiteite, Reduksie & Sinus/Kosinusreëls" },
+    formulas: [
+      { expr: "sin²θ + cos²θ = 1   |   tan θ = sin θ / cos θ", desc: { en: "Fundamental Trig Identities", af: "Fundamentele Trig-identiteite" } },
+      { expr: "a / sin A = b / sin B = c / sin C", desc: { en: "Sine Rule (Non-right triangles)", af: "Sinusreël (Nie-reghoekige driehoeke)" } },
+      { expr: "a² = b² + c² - 2bc·cos A   |   Area = ½ab·sin C", desc: { en: "Cosine Rule & Area Rule", af: "Kosinusreël & Oppervlaktereël" } }
+    ],
+    explanation: {
+      en: "Use the CAST diagram for Reduction Formulae: Quadrant 1 (All +), Quadrant 2 (180° - θ: Sin +), Quadrant 3 (180° + θ: Tan +), Quadrant 4 (360° - θ: Cos +). Co-functions swap at 90° ± θ: sin(90° - θ) = cos θ. In 2D/3D triangles, use the Cosine Rule when given SAS or SSS, and the Sine Rule when given a side and its opposite angle.",
+      af: "Gebruik die CAST-diagram vir Reduksieformules: Kwadrant 1 (Almal +), Kwadrant 2 (180° - θ: Sin +), Kwadrant 3 (180° + θ: Tan +), Kwadrant 4 (360° - θ: Cos +). Ko-funksies ruil by 90° ± θ: sin(90° - θ) = cos θ. In driehoeke, gebruik Kosinusreël vir SHS of SSS, en Sinusreël vir 'n sy en teenoorstaande hoek."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "Simplify: [ sin(180° - θ) · cos(90° + θ) ] / tan(180° + θ)", af: "Vereenvoudig: [ sin(180° - θ) · cos(90° + θ) ] / tan(180° + θ)" },
+        steps: {
+          en: [
+            "sin(180° - θ) = +sin θ (Quad 2)",
+            "cos(90° + θ) = -sin θ (Quad 2, co-function)",
+            "tan(180° + θ) = +tan θ = sin θ / cos θ (Quad 3)",
+            "Substitute: (-sin²θ) ÷ (sin θ / cos θ) = -sin θ · cos θ"
+          ],
+          af: [
+            "sin(180° - θ) = +sin θ (Kwad 2)",
+            "cos(90° + θ) = -sin θ (Kwad 2, ko-funksie)",
+            "tan(180° + θ) = +tan θ = sin θ / cos θ (Kwad 3)",
+            "Vervang in: (-sin²θ) ÷ (sin θ / cos θ) = -sin θ · cos θ"
+          ]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "Simplify: 1 - sin²(25°)", af: "Vereenvoudig: 1 - sin²(25°)" },
+        options: ["cos²(25°)", "sin²(25°)", "tan²(25°)", "-cos²(25°)"],
+        answer: 0,
+        solution: { en: "From sin²θ + cos²θ = 1, we get 1 - sin²θ = cos²θ.", af: "Uit sin²θ + cos²θ = 1 kry ons 1 - sin²θ = cos²θ." }
+      }
+    ]
+  },
+  {
+    id: "g11-euclidean",
+    grade: 11,
+    term: 2,
+    icon: "fa-circle-dot",
+    title: { en: "Euclidean Circle Geometry Theorems", af: "Euklidiese Sirkelmeetkunde-stellings" },
+    formulas: [
+      { expr: "∠ at centre = 2 × ∠ at circumference", desc: { en: "Centre Angle Theorem", af: "Middelpuntshoek-stelling" } },
+      { expr: "Opp ∠'s of cyclic quad = 180°", desc: { en: "Cyclic Quadrilateral Theorem", af: "Koordevierhoek-stelling" } },
+      { expr: "Tan ⊥ Radius   |   Tan-Chord Theorem", desc: { en: "Tangent Theorems", af: "Raaklyn-stellings" } }
+    ],
+    explanation: {
+      en: "Circle Geometry relies on spotting 4 key shapes: (1) Centre + 2 radii (angle at centre = 2× circumference, or angle in a semicircle = 90°), (2) Bow-tie/Butterfly (angles in the same segment are equal), (3) 4 vertices on the circle (cyclic quad: opposite angles sum to 180°; exterior angle = interior opposite), and (4) Tangent touching a chord (tan-chord theorem).",
+      af: "Sirkelmeetkunde steun op 4 sleutelvorms: (1) Middelpunt + 2 radiusse (middelpuntshoek = 2× omtrekshoek, of hoek in halfsirkel = 90°), (2) Strikdas (hoeke in dieselfde segment is gelyk), (3) 4 hoekpunte op die sirkel (koordevierhoek: teenoorstaande hoeke = 180°), en (4) Raaklyn aan 'n koord (raaklyn-koordstelling)."
+    },
+    examples: [
+      {
+    id: "g11-analytical",
+    grade: 11,
+    term: 3,
+    icon: "fa-compass",
+    title: { en: "Analytical Geometry & Angle of Inclination", af: "Analitiese Meetkunde & Inklinasiehoek" },
+    formulas: [
+      { expr: "tan θ = m", desc: { en: "Angle of Inclination (0° ≤ θ < 180°)", af: "Inklinasiehoek (0° ≤ θ < 180°)" } },
+      { expr: "y - y₁ = m(x - x₁)", desc: { en: "Point-Gradient Equation of a Line", af: "Punt-gradiënt Vergelyking van 'n Lyn" } }
+    ],
+    explanation: {
+      en: "The angle of inclination θ is the angle measured anti-clockwise from the positive x-axis to the line. If gradient m > 0, θ = arctan(m) (acute). If gradient m < 0, θ = 180° - arctan(|m|) (obtuse).",
+      af: "Die inklinasiehoek θ is die hoek antikloksgewys gemeet vanaf die positiewe x-as na die lyn. As gradiënt m > 0, is θ = arctan(m) (skerp). As m < 0, is θ = 180° - arctan(|m|) (stomp)."
+    },
+    examples: [
+      {
+        level: "basic",
+        problem: { en: "Find the angle of inclination of a line with gradient m = -1.", af: "Bepaal die inklinasiehoek van 'n lyn met gradiënt m = -1." },
+        steps: {
+          en: ["Reference angle = arctan(1) = 45°", "Since m < 0, θ = 180° - 45° = 135°"],
+          af: ["Verwysingshoek = arctan(1) = 45°", "Omdat m < 0, θ = 180° - 45° = 135°"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "What is the angle of inclination (in degrees) of the line y = x + 4?", af: "Wat is die inklinasiehoek (in grade) van die lyn y = x + 4?" },
+        type: "number",
+        answer: 45,
+        solution: { en: "Gradient m = 1, so tan θ = 1 ⇒ θ = 45°.", af: "Gradiënt m = 1, dus tan θ = 1 ⇒ θ = 45°." }
+      }
+    ]
+  },
+  {
+    id: "g11-finance",
+    grade: 11,
+    term: 3,
+    icon: "fa-coins",
+    title: { en: "Financial Maths: Depreciation & Nominal/Effective Rates", af: "Finansiële Wiskunde: Waardevermindering & Nominale/Effektiewe Koerse" },
+    formulas: [
+      { expr: "A = P(1 - i·n)   |   A = P(1 - i)ⁿ", desc: { en: "Straight-Line vs Reducing-Balance Depreciation", af: "Reguitlyn- vs Verminderende-saldo Waardevermindering" } },
+      { expr: "1 + i_eff = (1 + i_nom / m)ᵐ", desc: { en: "Nominal to Effective Annual Interest Rate", af: "Nominale na Effektiewe Jaarlikse Rentekoers" } }
+    ],
+    explanation: {
+      en: "In Grade 11 Financial Maths, assets lose value via Straight-Line depreciation (simple decay) or Reducing-Balance depreciation (compound decay). When interest is compounded monthly (m = 12), quarterly (m = 4), or semi-annually (m = 2), divide i by m and multiply years by m.",
+      af: "In Graad 11 Finansiële Wiskunde verloor bates waarde deur Reguitlyn-waardevermindering of Verminderende-saldo waardevermindering. Wanneer rente maandeliks (m = 12) of kwartaalliks (m = 4) saamgestel word, deel i deur m en maal jare met m."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "A laptop worth R12 000 depreciates at 20% p.a. on reducing balance for 2 years. Find its book value.", af: "'n Skootrekenaar van R12 000 depresieer teen 20% p.j. op verminderende saldo vir 2 jaar. Kry die boekwaarde." },
+        steps: {
+          en: ["A = 12 000(1 - 0,20)² = 12 000(0,64) = R7 680"],
+          af: ["A = 12 000(1 - 0,20)² = 12 000(0,64) = R7 680"]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "A car bought for R100 000 depreciates at 15% p.a. straight-line for 4 years. What is its value?", af: "'n Motor van R100 000 depresieer teen 15% p.j. reguitlyn vir 4 jaar. Wat is die waarde?" },
+        type: "number",
+        answer: 40000,
+        solution: { en: "A = 100 000(1 - 0,15 × 4) = 100 000(0,40) = R40 000.", af: "A = 100 000(1 - 0,15 × 4) = 100 000(0,40) = R40 000." }
+      }
+    ]
+  },
+  {
+    id: "g11-stats-prob",
+    grade: 11,
+    term: 4,
+    icon: "fa-chart-column",
+    title: { en: "Probability & Statistics (Venn & Std Dev)", af: "Waarskynlikheid & Statistiek (Venn & Std Afwyking)" },
+    formulas: [
+      { expr: "P(A or B) = P(A) + P(B) - P(A and B)", desc: { en: "Addition Rule of Probability", af: "Optelreël van Waarskynlikheid" } },
+      { expr: "P(A and B) = P(A) × P(B)", desc: { en: "Independent Events Test", af: "Onafhanklike Gebeure Toets" } },
+      { expr: "σ = √[ Σ(xᵢ - x̄)² / n ]", desc: { en: "Standard Deviation Formula", af: "Standaardafwyking-formule" } }
+    ],
+    explanation: {
+      en: "For Mutually Exclusive events, P(A and B) = 0, so P(A or B) = P(A) + P(B). For Independent events, P(A and B) = P(A) × P(B). In Statistics, Standard Deviation (σ) measures how spread out data is around the mean (x̄). On an Ogive (cumulative frequency curve), the median is at 50% of n.",
+      af: "Vir Onderling Uitsluitende gebeure is P(A en B) = 0, dus P(A of B) = P(A) + P(B). Vir Onafhanklike gebeure is P(A en B) = P(A) × P(B). In Statistiek meet Standaardafwyking (σ) hoe verspreid data rondom die gemiddelde (x̄) is. Op 'n Ogief lê die mediaan by 50% van n."
+    },
+    examples: [
+      {
+        level: "intermediate",
+        problem: { en: "Given P(A) = 0,4, P(B) = 0,5 and P(A or B) = 0,7. Are A and B independent?", af: "Gegee P(A) = 0,4, P(B) = 0,5 en P(A of B) = 0,7. Is A en B onafhanklik?" },
+        steps: {
+          en: [
+            "Find P(A and B): 0,7 = 0,4 + 0,5 - P(A and B) ⇒ P(A and B) = 0,2",
+            "Test P(A) × P(B) = 0,4 × 0,5 = 0,2",
+            "Since P(A and B) = P(A) × P(B) = 0,2, events A and B ARE independent."
+          ],
+          af: [
+            "Kry P(A en B): 0,7 = 0,4 + 0,5 - P(A en B) ⇒ P(A en B) = 0,2",
+            "Toets P(A) × P(B) = 0,4 × 0,5 = 0,2",
+            "Omdat P(A en B) = P(A) × P(B) = 0,2, IS gebeure A en B onafhanklik."
+          ]
+        }
+      }
+    ],
+    quizzes: [
+      {
+        q: { en: "If A and B are mutually exclusive with P(A) = 0,35 and P(B) = 0,45, find P(A or B).", af: "As A en B onderling uitsluitend is met P(A) = 0,35 en P(B) = 0,45, kry P(A of B)." },
+        options: ["0,80", "0,1575", "0,10", "0,70"],
+        answer: 0,
+        solution: { en: "For mutually exclusive events, P(A and B) = 0, so P(A or B) = 0,35 + 0,45 = 0,80.", af: "Vir onderling uitsluitende gebeure is P(A en B) = 0, dus P(A of B) = 0,35 + 0,45 = 0,80." }
+      }
+    ]
+  }
+];
+
+// ============================================================================
+// 2B. MODERN SCHOOL QUESTION PAPERS & MEMOS DATABASE (TERM 1 TO TERM 4)
+// ============================================================================
+const QUESTION_PAPERS = [
+  // -------------------- GRADE 9 PAPERS (TERM 1 - 4) --------------------
+  {
+    id: "g9-t1-test",
+    grade: 9,
+    term: 1,
+    paperType: { en: "Term 1 Control Test", af: "Kwartaal 1 Kontroletoets" },
+    title: { en: "Grade 9 Mathematics – Term 1 Formal Control Test", af: "Graad 9 Wiskunde – Kwartaal 1 Formele Kontroletoets" },
+    duration: { en: "1 Hour", af: "1 Uur" },
+    totalMarks: 50,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Number Systems & Exponents", af: "Getallestelsels & Eksponente" },
+        prompt: { en: "Simplify without using a calculator: (-4)² - 3³ + (2 × 5)⁰", af: "Vereenvoudig sonder 'n sakrekenaar: (-4)² - 3³ + (2 × 5)⁰" },
+        type: "number",
+        answer: -10,
+        memo: {
+          en: ["(-4)² = 16  [1 mark]", "3³ = 27  [1 mark]", "(2 × 5)⁰ = 1  [1 mark]", "16 - 27 + 1 = -10  [1 mark]"],
+          af: ["(-4)² = 16  [1 punt]", "3³ = 27  [1 punt]", "(2 × 5)⁰ = 1  [1 punt]", "16 - 27 + 1 = -10  [1 punt]"]
+        }
+      },
+      {
+        num: "1.2",
+        marks: 4,
+        topic: { en: "Laws of Exponents", af: "Wette van Eksponente" },
+        prompt: { en: "Simplify and leave your answer with positive exponents: (12a⁴b⁻³) ÷ (4a⁶b⁻¹)", af: "Vereenvoudig en laat jou antwoord met positiewe eksponente: (12a⁴b⁻³) ÷ (4a⁶b⁻¹)" },
+        options: ["3 / (a²b²)", "3a²b²", "3b² / a²", "8 / (a²b²)"],
+        answer: 0,
+        memo: {
+          en: ["12 ÷ 4 = 3  [1 mark]", "a⁴⁻⁶ = a⁻² and b⁻³⁻⁽⁻¹⁾ = b⁻²  [2 marks]", "Rewrite with positive exponents: 3 / (a²b²)  [1 mark]"],
+          af: ["12 ÷ 4 = 3  [1 punt]", "a⁴⁻⁶ = a⁻² en b⁻³⁻⁽⁻¹⁾ = b⁻²  [2 punte]", "Skryf met positiewe eksponente: 3 / (a²b²)  [1 punt]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 5,
+        topic: { en: "Numeric Patterns", af: "Getalpatrone" },
+        prompt: { en: "Consider the linear pattern: 7 ; 11 ; 15 ; 19 ; ... Determine the value of the 25th term (T₂₅).", af: "Beskou die lineêre patroon: 7 ; 11 ; 15 ; 19 ; ... Bepaal die waarde van die 25ste term (T₂₅)." },
+        type: "number",
+        answer: 103,
+        memo: {
+          en: ["First term a = 7, common difference d = 11 - 7 = 4  [1 mark]", "General rule: Tₙ = a + (n - 1)d = 7 + (n - 1)(4) = 4n + 3  [2 marks]", "T₂₅ = 4(25) + 3 = 100 + 3 = 103  [2 marks]"],
+          af: ["Eerste term a = 7, gemene verskil d = 11 - 7 = 4  [1 punt]", "Algemene reël: Tₙ = 4n + 3  [2 punte]", "T₂₅ = 4(25) + 3 = 103  [2 punte]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g9-t2-midyear",
+    grade: 9,
+    term: 2,
+    paperType: { en: "Term 2 Mid-Year Exam", af: "Kwartaal 2 Halfjaareksamen" },
+    title: { en: "Grade 9 Mathematics – June Mid-Year Examination", af: "Graad 9 Wiskunde – Junie Halfjaareksamen" },
+    duration: { en: "1.5 Hours", af: "1.5 Ure" },
+    totalMarks: 75,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Factorisation", af: "Faktorisering" },
+        prompt: { en: "Factorise completely: 2x² - 32", af: "Faktoriseer volledig: 2x² - 32" },
+        options: ["2(x - 4)(x + 4)", "2(x - 4)²", "(2x - 8)(x + 4)", "2(x² - 16)"],
+        answer: 0,
+        memo: {
+          en: ["Take out HCF of 2: 2(x² - 16)  [2 marks]", "Apply Difference of Two Squares: 2(x - 4)(x + 4)  [2 marks]"],
+          af: ["Haal GGF van 2 uit: 2(x² - 16)  [2 punte]", "Pas Verskil van Twee Vierkante toe: 2(x - 4)(x + 4)  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Algebraic Equations", af: "Algebraïese Vergelykings" },
+        prompt: { en: "Solve for x: 4(x - 2) = 2x + 6", af: "Los op vir x: 4(x - 2) = 2x + 6" },
+        type: "number",
+        answer: 7,
+        memo: {
+          en: ["Expand bracket: 4x - 8 = 2x + 6  [1 mark]", "Transpose terms: 4x - 2x = 6 + 8 ⇒ 2x = 14  [2 marks]", "Divide by 2: x = 7  [1 mark]"],
+          af: ["Brei hakie uit: 4x - 8 = 2x + 6  [1 punt]", "Transponeer terme: 2x = 14  [2 punte]", "Deel deur 2: x = 7  [1 punt]"]
+        }
+      },
+      {
+        num: "3.1",
+        marks: 4,
+        topic: { en: "Geometry of Triangles", af: "Meetkunde van Driehoeke" },
+        prompt: { en: "In ΔABC, ∠A = 2x, ∠B = 3x - 10°, and ∠C = x + 40°. Solve for x (in degrees).", af: "In ΔABC is ∠A = 2x, ∠B = 3x - 10°, en ∠C = x + 40°. Los op vir x (in grade)." },
+        type: "number",
+        answer: 25,
+        memo: {
+          en: ["2x + (3x - 10°) + (x + 40°) = 180° (sum of ∠'s in Δ)  [2 marks]", "6x + 30° = 180° ⇒ 6x = 150°  [1 mark]", "x = 25°  [1 mark]"],
+          af: ["2x + (3x - 10°) + (x + 40°) = 180° (som van ∠'e in Δ)  [2 punte]", "6x + 30° = 180° ⇒ 6x = 150°  [1 punt]", "x = 25°  [1 punt]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g9-t3-test",
+    grade: 9,
+    term: 3,
+    paperType: { en: "Term 3 Control Test", af: "Kwartaal 3 Kontroletoets" },
+    title: { en: "Grade 9 Mathematics – Term 3 Graphs & Measurement Test", af: "Graad 9 Wiskunde – Kwartaal 3 Grafieke & Meting Toets" },
+    duration: { en: "1 Hour", af: "1 Uur" },
+    totalMarks: 50,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Straight Line Graphs", af: "Reguitlyngrafieke" },
+        prompt: { en: "Determine the gradient (m) of the straight line passing through A(-2; 1) and B(2; 9).", af: "Bepaal die gradiënt (m) van die reguitlyn deur A(-2; 1) en B(2; 9)." },
+        type: "number",
+        answer: 2,
+        memo: {
+          en: ["m = (y₂ - y₁) / (x₂ - x₁)  [1 mark]", "m = (9 - 1) / (2 - (-2)) = 8 / 4  [2 marks]", "m = 2  [1 mark]"],
+          af: ["m = (y₂ - y₁) / (x₂ - x₁)  [1 punt]", "m = (9 - 1) / (2 - (-2)) = 8 / 4  [2 punte]", "m = 2  [1 punt]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Surface Area & Volume", af: "Buite-oppervlakte & Volume" },
+        prompt: { en: "A rectangular box has length 10 cm, breadth 5 cm and height 4 cm. Calculate its volume in cm³.", af: "'n Reghoekige boks het lengte 10 cm, breedte 5 cm en hoogte 4 cm. Bereken die volume in cm³." },
+        type: "number",
+        answer: 200,
+        memo: {
+          en: ["V = l × b × h  [1 mark]", "V = 10 × 5 × 4 = 200 cm³  [3 marks]"],
+          af: ["V = l × b × h  [1 punt]", "V = 10 × 5 × 4 = 200 cm³  [3 punte]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g9-t4-final",
+    grade: 9,
+    term: 4,
+    paperType: { en: "Term 4 Final Exam", af: "Kwartaal 4 Eindeksamen" },
+    title: { en: "Grade 9 Mathematics – November Final Examination", af: "Graad 9 Wiskunde – November Eindeksamen" },
+    duration: { en: "2 Hours", af: "2 Ure" },
+    totalMarks: 100,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Quadratic Equations", af: "Kwadratiese Vergelykings" },
+        prompt: { en: "Solve for x: x² - 7x + 12 = 0", af: "Los op vir x: x² - 7x + 12 = 0" },
+        options: ["x = 3 or x = 4", "x = -3 or x = -4", "x = 6 or x = 2", "x = 12 or x = 1"],
+        answer: 0,
+        memo: {
+          en: ["Factorise: (x - 3)(x - 4) = 0  [2 marks]", "x = 3 or x = 4  [2 marks]"],
+          af: ["Faktoriseer: (x - 3)(x - 4) = 0  [2 punte]", "x = 3 of x = 4  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Pythagoras", af: "Pythagoras" },
+        prompt: { en: "A ladder of length 10 m leans against a vertical wall with its foot 6 m from the wall. How high (in m) does it reach up the wall?", af: "'n Leer van 10 m leun teen 'n vertikale muur met sy voet 6 m van die muur af. Hoe hoog (in m) reik dit teen die muur op?" },
+        type: "number",
+        answer: 8,
+        memo: {
+          en: ["h² + 6² = 10² (Pythagoras)  [2 marks]", "h² = 100 - 36 = 64 ⇒ h = 8 m  [2 marks]"],
+          af: ["h² + 6² = 10² (Pythagoras)  [2 punte]", "h² = 100 - 36 = 64 ⇒ h = 8 m  [2 punte]"]
+        }
+      }
+    ]
+  },
+
+  // -------------------- GRADE 10 PAPERS (TERM 1 - 4) --------------------
+  {
+    id: "g10-t1-test",
+    grade: 10,
+    term: 1,
+    paperType: { en: "Term 1 Control Test", af: "Kwartaal 1 Kontroletoets" },
+    title: { en: "Grade 10 Mathematics – Term 1 Algebra & Exponents Control Test", af: "Graad 10 Wiskunde – Kwartaal 1 Algebra & Eksponente Toets" },
+    duration: { en: "1 Hour", af: "1 Uur" },
+    totalMarks: 50,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Factorisation (Cubes)", af: "Faktorisering (Derdemagte)" },
+        prompt: { en: "Factorise completely: 8x³ - 1", af: "Faktoriseer volledig: 8x³ - 1" },
+        options: ["(2x - 1)(4x² + 2x + 1)", "(2x - 1)(4x² - 2x + 1)", "(2x + 1)(4x² - 2x + 1)", "(2x - 1)³"],
+        answer: 0,
+        memo: {
+          en: ["Rewrite as (2x)³ - 1³  [1 mark]", "Apply Difference of Cubes: (2x - 1)(4x² + 2x + 1)  [3 marks]"],
+          af: ["Skryf as (2x)³ - 1³  [1 punt]", "Pas Verskil van Derdemagte toe: (2x - 1)(4x² + 2x + 1)  [3 punte]"]
+        }
+      },
+      {
+        num: "1.2",
+        marks: 4,
+        topic: { en: "Exponential Equations", af: "Eksponensiële Vergelykings" },
+        prompt: { en: "Solve for x: 5ˣ⁺¹ - 5ˣ = 100", af: "Los op vir x: 5ˣ⁺¹ - 5ˣ = 100" },
+        type: "number",
+        answer: 2,
+        memo: {
+          en: ["Factor out 5ˣ: 5ˣ(5 - 1) = 100  [2 marks]", "5ˣ(4) = 100 ⇒ 5ˣ = 25 = 5² ⇒ x = 2  [2 marks]"],
+          af: ["Haal 5ˣ uit: 5ˣ(5 - 1) = 100  [2 punte]", "5ˣ(4) = 100 ⇒ 5ˣ = 25 = 5² ⇒ x = 2  [2 punte]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g10-t2-midyear",
+    grade: 10,
+    term: 2,
+    paperType: { en: "Term 2 Mid-Year Exam", af: "Kwartaal 2 Halfjaareksamen" },
+    title: { en: "Grade 10 Mathematics – June Mid-Year Examination (P1 & P2)", af: "Graad 10 Wiskunde – Junie Halfjaareksamen (V1 & V2)" },
+    duration: { en: "2 Hours", af: "2 Ure" },
+    totalMarks: 100,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Functions (Parabola)", af: "Funksies (Parabool)" },
+        prompt: { en: "Given f(x) = -x² + 9. What is the maximum value of f(x)?", af: "Gegee f(x) = -x² + 9. Wat is die maksimum waarde van f(x)?" },
+        type: "number",
+        answer: 9,
+        memo: {
+          en: ["Turning point is (0; q) = (0; 9)  [2 marks]", "Since a = -1 < 0, the maximum value is y = 9  [2 marks]"],
+          af: ["Draaipunt is (0; q) = (0; 9)  [2 punte]", "Omdat a = -1 < 0, is die maksimum waarde y = 9  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Trigonometry", af: "Trigonometrie" },
+        prompt: { en: "Without a calculator, evaluate: 4·sin 30° + 3·tan² 45°", af: "Bereken sonder 'n sakrekenaar: 4·sin 30° + 3·tan² 45°" },
+        type: "number",
+        answer: 5,
+        memo: {
+          en: ["sin 30° = ½ and tan 45° = 1  [2 marks]", "4(½) + 3(1)² = 2 + 3 = 5  [2 marks]"],
+          af: ["sin 30° = ½ en tan 45° = 1  [2 punte]", "4(½) + 3(1)² = 2 + 3 = 5  [2 punte]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g10-t3-test",
+    grade: 10,
+    term: 3,
+    paperType: { en: "Term 3 Control Test", af: "Kwartaal 3 Kontroletoets" },
+    title: { en: "Grade 10 Mathematics – Term 3 Analytical Geometry & Finance Test", af: "Graad 10 Wiskunde – Kwartaal 3 Analitiese Meetkunde & Finansies" },
+    duration: { en: "1 Hour", af: "1 Uur" },
+    totalMarks: 50,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Analytical Geometry", af: "Analitiese Meetkunde" },
+        prompt: { en: "M(3; 4) is the midpoint of line segment AB where A(1; 2) and B(x; 6). Find the value of x.", af: "M(3; 4) is die middelpunt van lynstuk AB waar A(1; 2) en B(x; 6). Bepaal die waarde van x." },
+        type: "number",
+        answer: 5,
+        memo: {
+          en: ["(x₁ + x₂) / 2 = 3 ⇒ (1 + x) / 2 = 3  [2 marks]", "1 + x = 6 ⇒ x = 5  [2 marks]"],
+          af: ["(x₁ + x₂) / 2 = 3 ⇒ (1 + x) / 2 = 3  [2 punte]", "1 + x = 6 ⇒ x = 5  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Financial Mathematics", af: "Finansiële Wiskunde" },
+        prompt: { en: "R4 000 is invested at 8% p.a. simple interest for 5 years. Calculate the final accumulated amount (in Rands).", af: "R4 000 word belê teen 8% p.j. enkelvoudige rente vir 5 jaar. Bereken die eindbedrag (in Rand)." },
+        type: "number",
+        answer: 5600,
+        memo: {
+          en: ["A = P(1 + i·n) = 4000(1 + 0,08 × 5)  [2 marks]", "A = 4000(1,4) = R5 600  [2 marks]"],
+          af: ["A = P(1 + i·n) = 4000(1 + 0,08 × 5)  [2 punte]", "A = 4000(1,4) = R5 600  [2 punte]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g10-t4-final",
+    grade: 10,
+    term: 4,
+    paperType: { en: "Term 4 Final Exam", af: "Kwartaal 4 Eindeksamen" },
+    title: { en: "Grade 10 Mathematics – November Final Examination (Paper 1 & 2)", af: "Graad 10 Wiskunde – November Eindeksamen (Vraestel 1 & 2)" },
+    duration: { en: "2 Hours", af: "2 Ure" },
+    totalMarks: 100,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Algebra & Inequalities", af: "Algebra & Ongelykhede" },
+        prompt: { en: "Solve for x: (2x - 1)(x + 3) = 0", af: "Los op vir x: (2x - 1)(x + 3) = 0" },
+        options: ["x = ½ or x = -3", "x = -½ or x = 3", "x = 2 or x = -3", "x = 1 or x = -3"],
+        answer: 0,
+        memo: {
+          en: ["2x - 1 = 0 ⇒ x = ½  [2 marks]", "x + 3 = 0 ⇒ x = -3  [2 marks]"],
+          af: ["2x - 1 = 0 ⇒ x = ½  [2 punte]", "x + 3 = 0 ⇒ x = -3  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Probability", af: "Waarskynlikheid" },
+        prompt: { en: "Given P(A) = 0,45, P(B) = 0,35 and P(A and B) = 0,15. Calculate P(A or B).", af: "Gegee P(A) = 0,45, P(B) = 0,35 en P(A en B) = 0,15. Bereken P(A of B)." },
+        options: ["0,65", "0,80", "0,95", "0,25"],
+        answer: 0,
+        memo: {
+          en: ["P(A or B) = P(A) + P(B) - P(A and B)  [1 mark]", "P(A or B) = 0,45 + 0,35 - 0,15 = 0,65  [3 marks]"],
+          af: ["P(A of B) = P(A) + P(B) - P(A en B)  [1 punt]", "P(A of B) = 0,45 + 0,35 - 0,15 = 0,65  [3 punte]"]
+        }
+      }
+    ]
+  },
+
+  // -------------------- GRADE 11 PAPERS (TERM 1 - 4) --------------------
+  {
+    id: "g11-t1-test",
+    grade: 11,
+    term: 1,
+    paperType: { en: "Term 1 Control Test", af: "Kwartaal 1 Kontroletoets" },
+    title: { en: "Grade 11 Mathematics – Term 1 Algebra, Surds & Patterns Control Test", af: "Graad 11 Wiskunde – Kwartaal 1 Algebra, Wortelvorme & Patrone" },
+    duration: { en: "1 Hour", af: "1 Uur" },
+    totalMarks: 50,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Surd Equations (EC/Nov Style)", af: "Wortelvergelykings (OK/Nov Styl)" },
+        prompt: { en: "Solve for x: x - √(x - 1) = 3", af: "Los op vir x: x - √(x - 1) = 3" },
+        type: "number",
+        answer: 5,
+        memo: {
+          en: ["Isolate surd: x - 3 = √(x - 1)  [1 mark]", "Square both sides: x² - 6x + 9 = x - 1 ⇒ x² - 7x + 10 = 0  [1 mark]", "(x - 5)(x - 2) = 0 ⇒ x = 5 or x = 2  [1 mark]", "Check: x = 2 gives 2 - 1 = 1 ≠ 3 (reject). Valid answer: x = 5  [1 mark]"],
+          af: ["Isoleer wortel: x - 3 = √(x - 1)  [1 punt]", "Kwadreer beide kante: x² - 6x + 9 = x - 1 ⇒ x² - 7x + 10 = 0  [1 punt]", "(x - 5)(x - 2) = 0 ⇒ x = 5 of x = 2  [1 punt]", "Toets: x = 2 verval. Geldige antwoord: x = 5  [1 punt]"]
+        }
+      },
+      {
+        num: "1.2",
+        marks: 4,
+        topic: { en: "Nature of Roots", af: "Aard van Wortels" },
+        prompt: { en: "The roots of f(x) = 0 are x = [4 ± √(16 - 4m(-m + 5))] / 2m. For which values of m are the roots non-real?", af: "Die wortels van f(x) = 0 is x = [4 ± √(16 - 4m(-m + 5))] / 2m. Vir watter waardes van m is die wortels nie-reëel?" },
+        options: ["1 < m < 4", "m < 1 or m > 4", "1 ≤ m ≤ 4", "m > 4"],
+        answer: 0,
+        memo: {
+          en: ["Non-real roots require Δ < 0: 16 - 4m(-m + 5) < 0  [1 mark]", "4m² - 20m + 16 < 0 ⇒ m² - 5m + 4 < 0  [1 mark]", "(m - 1)(m - 4) < 0 ⇒ 1 < m < 4  [2 marks]"],
+          af: ["Nie-reële wortels vereis Δ < 0: 16 - 4m(-m + 5) < 0  [1 punt]", "4m² - 20m + 16 < 0 ⇒ m² - 5m + 4 < 0  [1 punt]", "(m - 1)(m - 4) < 0 ⇒ 1 < m < 4  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Quadratic Number Patterns (DBE Style)", af: "Kwadratiese Getalpatrone (DBO Styl)" },
+        prompt: { en: "Consider the quadratic pattern: 4 ; p ; 11 ; q ; 22 ; ... with a constant second difference of 1. Determine the value of p.", af: "Beskou die kwadratiese syferpatroon: 4 ; p ; 11 ; q ; 22 ; ... met 'n konstante tweede verskil van 1. Bepaal die waarde van p." },
+        type: "number",
+        answer: 7,
+        memo: {
+          en: ["1st differences: d₁ = p - 4 and d₂ = 11 - p  [1 mark]", "2nd difference = d₂ - d₁ = 1 ⇒ (11 - p) - (p - 4) = 1  [2 marks]", "15 - 2p = 1 ⇒ 2p = 14 ⇒ p = 7  [1 mark]"],
+          af: ["1ste verskille: d₁ = p - 4 en d₂ = 11 - p  [1 punt]", "2de verskil = (11 - p) - (p - 4) = 1  [2 punte]", "15 - 2p = 1 ⇒ 2p = 14 ⇒ p = 7  [1 punt]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g11-t2-midyear",
+    grade: 11,
+    term: 2,
+    paperType: { en: "Term 2 Mid-Year Exam", af: "Kwartaal 2 Halfjaareksamen" },
+    title: { en: "Grade 11 Mathematics – June Mid-Year Examination (Paper 1 & 2)", af: "Graad 11 Wiskunde – Junie Halfjaareksamen (Vraestel 1 & 2)" },
+    duration: { en: "2 Hours", af: "2 Ure" },
+    totalMarks: 100,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Shifted Parabola", af: "Geskuifde Parabool" },
+        prompt: { en: "Given f(x) = 3(x - 2)² - 12. Determine the positive x-intercept of f.", af: "Gegee f(x) = 3(x - 2)² - 12. Bepaal die positiewe x-afsnit van f." },
+        type: "number",
+        answer: 4,
+        memo: {
+          en: ["Set y = 0: 3(x - 2)² - 12 = 0 ⇒ (x - 2)² = 4  [2 marks]", "x - 2 = ±2 ⇒ x = 4 or x = 0. Positive x-intercept is 4  [2 marks]"],
+          af: ["Stel y = 0: 3(x - 2)² - 12 = 0 ⇒ (x - 2)² = 4  [2 punte]", "x - 2 = ±2 ⇒ x = 4 of x = 0. Positiewe x-afsnit is 4  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Trigonometry Reduction", af: "Trigonometrie Reduksie" },
+        prompt: { en: "Simplify completely: [sin(180° - θ) · cos(90° + θ)] / sin²θ", af: "Vereenvoudig volledig: [sin(180° - θ) · cos(90° + θ)] / sin²θ" },
+        options: ["-1", "1", "-cos θ", "tan θ"],
+        answer: 0,
+        memo: {
+          en: ["sin(180° - θ) = sin θ  [1 mark]", "cos(90° + θ) = -sin θ  [2 marks]", "(sin θ · -sin θ) / sin²θ = -sin²θ / sin²θ = -1  [1 mark]"],
+          af: ["sin(180° - θ) = sin θ  [1 punt]", "cos(90° + θ) = -sin θ  [2 punte]", "(sin θ · -sin θ) / sin²θ = -sin²θ / sin²θ = -1  [1 punt]"]
+        }
+      },
+      {
+        num: "3.1",
+        marks: 4,
+        topic: { en: "Euclidean Circle Geometry", af: "Euklidiese Sirkelmeetkunde" },
+        prompt: { en: "O is the centre of a circle passing through A, B and C. If central angle AOB = 136°, find acute angle ACB on the circumference (in degrees).", af: "O is die middelpunt van 'n sirkel deur A, B en C. As middelpuntshoek AOB = 136°, bereken skerp hoek ACB op die omtrek (in grade)." },
+        type: "number",
+        answer: 68,
+        memo: {
+          en: ["∠ACB = ½ × ∠AOB (∠ at centre = 2 × ∠ at circumference)  [2 marks]", "∠ACB = ½ × 136° = 68°  [2 marks]"],
+          af: ["∠ACB = ½ × ∠AOB (middelpuntshoek = 2 × omtrekshoek)  [2 punte]", "∠ACB = ½ × 136° = 68°  [2 punte]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g11-t3-test",
+    grade: 11,
+    term: 3,
+    paperType: { en: "Term 3 Control Test", af: "Kwartaal 3 Kontroletoets" },
+    title: { en: "Grade 11 Mathematics – Term 3 Analytical Geometry & Financial Maths Test", af: "Graad 11 Wiskunde – Kwartaal 3 Analitiese Meetkunde & Finansies" },
+    duration: { en: "1 Hour", af: "1 Uur" },
+    totalMarks: 50,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Analytical Geometry", af: "Analitiese Meetkunde" },
+        prompt: { en: "Points A(1; 2), B(3; 6) and C(5; k) are collinear. Determine the value of k.", af: "Punte A(1; 2), B(3; 6) en C(5; k) is saamlynig. Bepaal die waarde van k." },
+        type: "number",
+        answer: 10,
+        memo: {
+          en: ["m_AB = (6 - 2) / (3 - 1) = 4 / 2 = 2  [2 marks]", "m_BC = m_AB ⇒ (k - 6) / (5 - 3) = 2 ⇒ k - 6 = 4 ⇒ k = 10  [2 marks]"],
+          af: ["m_AB = (6 - 2) / (3 - 1) = 4 / 2 = 2  [2 punte]", "m_BC = m_AB ⇒ (k - 6) / (5 - 3) = 2 ⇒ k - 6 = 4 ⇒ k = 10  [2 punte]"]
+        }
+      },
+      {
+        num: "2.1",
+        marks: 4,
+        topic: { en: "Depreciation", af: "Waardevermindering" },
+        prompt: { en: "Equipment valued at R20 000 depreciates at 10% p.a. on the reducing-balance method for 2 years. Calculate its value (in Rands).", af: "Toerusting ter waarde van R20 000 depresieer teen 10% p.j. volgens die verminderende-saldometode vir 2 jaar. Bereken die waarde (in Rand)." },
+        type: "number",
+        answer: 16200,
+        memo: {
+          en: ["A = P(1 - i)ⁿ = 20 000(1 - 0,10)²  [2 marks]", "A = 20 000(0,81) = R16 200  [2 marks]"],
+          af: ["A = P(1 - i)ⁿ = 20 000(1 - 0,10)²  [2 punte]", "A = 20 000(0,81) = R16 200  [2 punte]"]
+        }
+      }
+    ]
+  },
+  {
+    id: "g11-t4-final",
+    grade: 11,
+    term: 4,
+    paperType: { en: "Term 4 Final Exam", af: "Kwartaal 4 Eindeksamen" },
+    title: { en: "Grade 11 Mathematics – November Final Examination (DBE Paper 1 & 2)", af: "Graad 11 Wiskunde – November Eindeksamen (DBO Vraestel 1 & 2)" },
+    duration: { en: "3 Hours", af: "3 Ure" },
+    totalMarks: 150,
+    questions: [
+      {
+        num: "1.1",
+        marks: 4,
+        topic: { en: "Simultaneous Equations (DBE Nov)", af: "Gelyktydige Vergelykings (DBO Nov)" },
+        prompt: { en: "Solve simultaneously for x and y: y + x = 2 and x² + 3xy + 8 = 0. Which coordinate pair is a valid solution?", af: "Los gelyktydig op vir x en y: y + x = 2 en x² + 3xy + 8 = 0. Watter koördinaatpaar is 'n geldige oplossing?" },
+        options: ["(4 ; -2) and (-1 ; 3)", "(4 ; 2) and (1 ; -3)", "(-4 ; 2) and (1 ; 3)", "(2 ; 0) and (-1 ; 3)"],
+        answer: 0,
+        memo: {
+          en: ["From linear eq: y = 2 - x  [1 mark]", "Substitute: x² + 3x(2 - x) + 8 = 0 ⇒ -2x² + 6x + 8 = 0 ⇒ x² - 3x - 4 = 0  [1 mark]", "(x - 4)(x + 1) = 0 ⇒ x = 4 or x = -1  [1 mark]", "When x = 4, y = -2; when x = -1, y = 3 ⇒ (4; -2) and (-1; 3)  [1 mark]"],
+          af: ["Uit lineêre vgl: y = 2 - x  [1 punt]", "Vervang in: x² + 3x(2 - x) + 8 = 0 ⇒ x² - 3x - 4 = 0  [1 punt]", "(x - 4)(x + 1) = 0 ⇒ x = 4 of x = -1  [1 punt]", "As x = 4, y = -2; as x = -1, y = 3 ⇒ (4; -2) en (-1; 3)  [1 punt]"]
+        }
+      },
+      {
+        num: "3.1",
+        marks: 5,
+        topic: { en: "Quadratic Sequence Minimum (DBE Nov)", af: "Kwadratiese Ry Minimum (DBO Nov)" },
+        prompt: { en: "A quadratic pattern has general term Tₙ = 3n² - 60n + 301. Calculate the minimum term value in this sequence.", af: "'n Kwadratiese patroon het algemene term Tₙ = 3n² - 60n + 301. Bereken die minimum termwaarde in hierdie ry." },
+        type: "number",
+        answer: 1,
+        memo: {
+          en: ["Position of minimum: n = -b / 2a = -(-60) / 2(3) = 10  [2 marks]", "Substitute n = 10: T₁₀ = 3(10)² - 60(10) + 301 = 300 - 600 + 301 = 1  [3 marks]"],
+          af: ["Posisie van minimum: n = -b / 2a = -(-60) / 2(3) = 10  [2 punte]", "Vervang n = 10: T₁₀ = 3(10)² - 60(10) + 301 = 300 - 600 + 301 = 1  [3 punte]"]
+        }
+      },
+      {
+        num: "6.1",
+        marks: 4,
+        topic: { en: "Probability (Independent Events)", af: "Waarskynlikheid (Onafhanklike Gebeure)" },
+        prompt: { en: "Events A and B are independent. If P(A) = 0,4 and P(B) = 0,5, determine P(A and B).", af: "Gebeure A en B is onafhanklik. As P(A) = 0,4 en P(B) = 0,5, bepaal P(A en B)." },
+        options: ["0,20", "0,90", "0,10", "0,80"],
+        answer: 0,
+        memo: {
+          en: ["For independent events: P(A and B) = P(A) × P(B)  [2 marks]", "P(A and B) = 0,4 × 0,5 = 0,20  [2 marks]"],
+          af: ["Vir onafhanklike gebeure: P(A en B) = P(A) × P(B)  [2 punte]", "P(A en B) = 0,4 × 0,5 = 0,20  [2 punte]"]
+        }
+      }
+    ]
+  }
+];
+
+// ============================================================================
+// 3. APP STATE & PERSISTENCE (LOCALSTORAGE)
+// ============================================================================
+const DEFAULT_STATE = {
+  lang: 'en',
+  darkMode: false,
+  grade: 11,
+  topicId: 'g11-patterns',
+  activeTab: 'learn',
+  xp: 0,
+  streak: 1,
+  lastActiveDate: new Date().toDateString(),
+  questionsSolved: 0,
+  masteredTopics: [],
+  selectedOptionalTopics: ['g11-quadratics', 'g11-patterns'],
+  selectedTerm: 1,
+  selectedPaperId: 'g11-t1-test',
+  gameHighScore: 0,
+  dailyCompletedDate: ''
+};
+
+let state = { ...DEFAULT_STATE };
+try {
+  const saved = localStorage.getItem('caps_mathmaster_v1');
+  if (saved) state = { ...DEFAULT_STATE, ...JSON.parse(saved) };
+} catch (e) {}
+
+// Check daily streak
+const todayStr = new Date().toDateString();
+if (state.lastActiveDate !== todayStr) {
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  state.streak = (state.lastActiveDate === yesterday) ? state.streak + 1 : 1;
+  state.lastActiveDate = todayStr;
+  saveState();
+}
+
+function saveState() {
+  try {
+    localStorage.setItem('caps_mathmaster_v1', JSON.stringify(state));
+  } catch (e) {}
+}
+
+// ============================================================================
+// 4. GAMIFICATION, XP & BADGES
+// ============================================================================
+const LEVELS = [
+  { level: 1, minXp: 0, title: { en: "Math Novice", af: "Wiskunde-beginner" } },
+  { level: 2, minXp: 150, title: { en: "Number Explorer", af: "Getal-verkenner" } },
+  { level: 3, minXp: 350, title: { en: "Algebra Apprentice", af: "Algebra-vakleerling" } },
+  { level: 4, minXp: 650, title: { en: "Pattern Pro", af: "Patroon-kenner" } },
+  { level: 5, minXp: 1000, title: { en: "Geometry Strategist", af: "Meetkunde-strateeg" } },
+  { level: 6, minXp: 1500, title: { en: "Trig Tactician", af: "Trig-taktikus" } },
+  { level: 7, minXp: 2200, title: { en: "CAPS Champion", af: "KABV-kampioen" } },
+  { level: 8, minXp: 3000, title: { en: "Distinction Scholar", af: "Onderskeiding-leerder" } }
+];
+
+const BADGES = [
+  { id: 'b1', icon: 'fa-seedling', name: { en: 'First Steps', af: 'Eerste Tree' }, desc: { en: 'Earn your first 25 XP', af: 'Verdien jou eerste 25 XP' }, check: s => s.xp >= 25 },
+  { id: 'b2', icon: 'fa-fire', name: { en: 'On a Roll', af: 'Op Dreef' }, desc: { en: 'Solve 5 practice questions', af: 'Los 5 oefenvrae op' }, check: s => s.questionsSolved >= 5 },
+  { id: 'b3', icon: 'fa-graduation-cap', name: { en: 'Topic Master', af: 'Onderwerp-meester' }, desc: { en: 'Master at least 1 CAPS topic', af: 'Bemeester minstens 1 KABV-onderwerp' }, check: s => s.masteredTopics.length >= 1 },
+  { id: 'b4', icon: 'fa-gamepad', name: { en: 'Arcade Ace', af: 'Arkade-aas' }, desc: { en: 'Score 100+ in any Math Game', af: 'Behaal 100+ in enige Wiskunde-speletjie' }, check: s => s.gameHighScore >= 100 },
+  { id: 'b5', icon: 'fa-crown', name: { en: '500 XP Club', af: '500 XP Klub' }, desc: { en: 'Reach 500 Total XP', af: 'Bereik 500 Totale XP' }, check: s => s.xp >= 500 },
+  { id: 'b6', icon: 'fa-medal', name: { en: 'CAPS Legend', af: 'KABV-legende' }, desc: { en: 'Reach 1000 Total XP', af: 'Bereik 1000 Totale XP' }, check: s => s.xp >= 1000 }
+];
+
+function getLevelInfo() {
+  let current = LEVELS[0];
+  let next = LEVELS[1];
+  for (let i = 0; i < LEVELS.length; i++) {
+    if (state.xp >= LEVELS[i].minXp) {
+      current = LEVELS[i];
+      next = LEVELS[i + 1] || null;
+    }
+  }
+  const progress = next ? Math.min(100, Math.round(((state.xp - current.minXp) / (next.minXp - current.minXp)) * 100)) : 100;
+  return { current, next, progress };
+}
+
+function awardXp(amount, reasonText) {
+  const prevLvl = getLevelInfo().current.level;
+  state.xp += amount;
+  saveState();
+  updateHeaderGamification();
+  const newLvl = getLevelInfo().current.level;
+
+  const toast = document.getElementById('xpToast');
+  const titleEl = document.getElementById('xpToastTitle');
+  const descEl = document.getElementById('xpToastDesc');
+  titleEl.textContent = newLvl > prevLvl
+    ? (state.lang === 'en' ? `LEVEL UP! Level ${newLvl} (+${amount} XP)` : `VLAK OP! Vlak ${newLvl} (+${amount} XP)`)
+    : `+${amount} XP!`;
+  descEl.textContent = reasonText || (state.lang === 'en' ? 'Keep up the awesome maths work!' : 'Hou so aan met die puik wiskundewerk!');
+
+  toast.classList.remove('opacity-0', 'translate-y-4');
+  toast.classList.add('opacity-100', 'translate-y-0');
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => {
+    toast.classList.add('opacity-0', 'translate-y-4');
+    toast.classList.remove('opacity-100', 'translate-y-0');
+  }, 3000);
+}
+
+function updateHeaderGamification() {
+  const { current, progress } = getLevelInfo();
+  document.getElementById('xpDisplay').textContent = `${state.xp} XP`;
+  document.getElementById('levelBadge').textContent = `${state.lang === 'en' ? 'Lvl' : 'Vlk'} ${current.level}`;
+  document.getElementById('xpProgressBar').style.width = `${progress}%`;
+  document.getElementById('streakDisplay').textContent = `${state.streak}d`;
+}
+
+function showAchievementsModal() {
+  const { current } = getLevelInfo();
+  document.getElementById('modalProfileTitle').textContent = state.lang === 'en' ? 'Student Progress & Badges' : 'Leerder-vordering & Kentekens';
+  document.getElementById('modalLevelSubtitle').textContent = `${state.lang === 'en' ? 'Level' : 'Vlak'} ${current.level} • ${current.title[state.lang]}`;
+  document.getElementById('statTotalXp').textContent = state.xp;
+  document.getElementById('statQuizzesDone').textContent = state.questionsSolved;
+  document.getElementById('statHighScore').textContent = state.gameHighScore;
+
+  const grid = document.getElementById('badgesGrid');
+  grid.innerHTML = BADGES.map(b => {
+    const unlocked = b.check(state);
+    return `
+      <div class="p-3 rounded-xl border ${unlocked ? 'bg-amber-50/70 dark:bg-amber-950/30 border-amber-300 dark:border-amber-700' : 'bg-slate-100/60 dark:bg-slate-800/40 border-slate-200 dark:border-slate-800 opacity-50'} flex items-start gap-2.5">
+        <div class="w-8 h-8 rounded-lg ${unlocked ? 'bg-amber-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-500'} flex items-center justify-center shrink-0 mt-0.5">
+          <i class="fa-solid ${b.icon}"></i>
+        </div>
+        <div>
+          <p class="font-bold text-xs">${b.name[state.lang]}</p>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-snug">${b.desc[state.lang]}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  const modal = document.getElementById('achievementsModal');
+  modal.classList.remove('hidden');
+  modal.classList.add('flex');
+}
+
+function closeAchievementsModal() {
+  const modal = document.getElementById('achievementsModal');
+  modal.classList.add('hidden');
+  modal.classList.remove('flex');
+}
+
+// ============================================================================
+// 5. AI VOICE TUTOR (WEB SPEECH API) & GEMINI AI EXPLAINER
+// ============================================================================
+let speechRate = 1.0;
+
+function stopVoice() {
+  if ('speechSynthesis' in window) {
+    window.speechSynthesis.cancel();
+  }
+  const btn = document.getElementById('voicePlayBtn');
+  if (btn) btn.classList.remove('speaking-pulse');
+}
+
+function cleanMathForSpeech(text, lang) {
+  let cleaned = text
+    .replace(/²/g, lang === 'af' ? ' kwadraat ' : ' squared ')
+    .replace(/³/g, lang === 'af' ? ' tot die derde mag ' : ' cubed ')
+    .replace(/√/g, lang === 'af' ? ' vierkantswortel van ' : ' square root of ')
+    .replace(/±/g, lang === 'af' ? ' plus of minus ' : ' plus or minus ')
+    .replace(/⇒/g, lang === 'af' ? ' dus ' : ' therefore ')
+    .replace(/≠/g, lang === 'af' ? ' nie gelyk aan ' : ' not equal to ')
+    .replace(/≤/g, lang === 'af' ? ' kleiner of gelyk aan ' : ' less than or equal to ')
+    .replace(/≥/g, lang === 'af' ? ' groter of gelyk aan ' : ' greater than or equal to ')
+    .replace(/∠/g, lang === 'af' ? ' hoek ' : ' angle ')
+    .replace(/⊥/g, lang === 'af' ? ' loodreg op ' : ' perpendicular to ')
+    .replace(/Δ/g, ' delta ')
+    .replace(/θ/g, ' theta ')
+    .replace(/π/g, ' pi ');
+  return cleaned;
+}
+
+function speakCurrentLesson() {
+  if (!('speechSynthesis' in window)) return;
+  stopVoice();
+
+  const topic = getCurrentTopic();
+  const lang = state.lang;
+  const t = UI_TEXT[lang];
+
+  let script = `${topic.title[lang]}. `;
+  script += `${topic.explanation[lang]} `;
+  script += `${lang === 'en' ? 'Key formulas include: ' : 'Belangrike formules sluit in: '} `;
+  topic.formulas.forEach(f => {
+    script += `${f.desc[lang]}: ${f.expr}. `;
+  });
+  if (topic.examples[0]) {
+    script += `${lang === 'en' ? 'Let us walk through an example. ' : 'Kom ons kyk na n voorbeeld. '} `;
+    script += `${topic.examples[0].problem[lang]}. `;
+    script += topic.examples[0].steps[lang].join('. ');
+  }
+
+  const utterance = new SpeechSynthesisUtterance(cleanMathForSpeech(script, lang));
+  const voices = window.speechSynthesis.getVoices();
+  if (lang === 'af') {
+    const afVoice = voices.find(v => v.lang.toLowerCase().includes('af')) || voices.find(v => v.lang.toLowerCase().includes('nl')) || voices.find(v => v.lang.toLowerCase().includes('en-za'));
+    if (afVoice) utterance.voice = afVoice;
+    utterance.lang = 'af-ZA';
+  } else {
+    const enVoice = voices.find(v => v.lang.toLowerCase().includes('en-za')) || voices.find(v => v.lang.toLowerCase().includes('en-gb')) || voices.find(v => v.lang.startsWith('en'));
+    if (enVoice) utterance.voice = enVoice;
+    utterance.lang = 'en-ZA';
+  }
+  utterance.rate = speechRate;
+
+  const btn = document.getElementById('voicePlayBtn');
+  if (btn) btn.classList.add('speaking-pulse');
+  utterance.onend = () => { if (btn) btn.classList.remove('speaking-pulse'); };
+  utterance.onerror = () => { if (btn) btn.classList.remove('speaking-pulse'); };
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function setSpeechRate(rate) {
+  speechRate = rate;
+  document.querySelectorAll('.rate-btn').forEach(b => {
+    b.classList.remove('bg-brand-600', 'text-white');
+    b.classList.add('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+  });
+  const active = document.getElementById(`rate-${rate}`);
+  if (active) {
+    active.classList.add('bg-brand-600', 'text-white');
+    active.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'text-slate-700', 'dark:text-slate-300');
+  }
+}
+
+async function generateAiExtraTip() {
+  const box = document.getElementById('aiTutorOutput');
+  const btn = document.getElementById('aiGenerateBtn');
+  const topic = getCurrentTopic();
+  const lang = state.lang;
+  const t = UI_TEXT[lang];
+
+  box.classList.remove('hidden');
+  box.innerHTML = `<div class="flex items-center gap-2 text-xs font-semibold text-brand-600 dark:text-brand-400"><i class="fa-solid fa-spinner fa-spin"></i> ${t.aiGenerating}</div>`;
+  btn.disabled = true;
+
+  const prompt = lang === 'en'
+    ? `You are an encouraging South African CAPS Grade ${topic.grade} Mathematics tutor. Topic: "${topic.title.en}". Give 1 short exam memory trick/common mistake warning, and 1 brand new worked example with 3 clear steps. Keep it concise, plain text with clean math symbols (², √, ÷, ×), under 140 words.`
+    : `Jy is 'n bemoedigende Suid-Afrikaanse KABV Graad ${topic.grade} Wiskunde-onderwyser. Onderwerp: "${topic.title.af}". Gee 1 kort eksamen-wenk of waarskuwing teen 'n algemene fout, en 1 splinternuwe uitgewerkte voorbeeld met 3 duidelike stappe. Hou dit bondig in Afrikaans onder 140 woorde.`;
+
+  try {
+    const apiKey = "";
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`;
+    let resultText = null;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const resp = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        resultText = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+        break;
+      }
+      await new Promise(r => setTimeout(r, 1000 * Math.pow(2, attempt)));
+    }
+    if (!resultText) throw new Error('Fallback');
+    const formatted = resultText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\n/g, '<br>');
+    box.innerHTML = `
+      <div class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200 space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> Gemini AI Tutor</span>
+          <button onclick="speakCustomText(this)" data-speech="${resultText.replace(/"/g, '&quot;')}" class="text-xs font-bold text-brand-600 dark:text-brand-400 hover:underline"><i class="fa-solid fa-volume-high mr-1"></i> ${lang === 'en' ? 'Listen' : 'Luister'}</button>
+        </div>
+        <div>${formatted}</div>
+      </div>`;
+  } catch (err) {
+    // Offline/Fallback smart tip tailored to topic
+    const fallback = lang === 'en'
+      ? `<strong>Exam Pro-Tip for ${topic.title.en}:</strong> Always write down the general formula first before substituting values—CAPS markers award a dedicated formula mark! Double-check signs when expanding brackets or transposing terms.`
+      : `<strong>Eksamen-wenk vir ${topic.title.af}:</strong> Skryf altyd eers die algemene formule neer voordat jy waardes invervang—KABV-nasieners gee 'n aparte punt vir die formule! Kontroleer tekens dubbel wanneer jy hakies uitbrei.`;
+    box.innerHTML = `<div class="text-xs sm:text-sm leading-relaxed text-slate-700 dark:text-slate-200">${fallback}</div>`;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function speakCustomText(btn) {
+  if (!('speechSynthesis' in window)) return;
+  stopVoice();
+  const raw = btn.getAttribute('data-speech') || '';
+  const utt = new SpeechSynthesisUtterance(cleanMathForSpeech(raw, state.lang));
+  utt.lang = state.lang === 'af' ? 'af-ZA' : 'en-ZA';
+  utt.rate = speechRate;
+  window.speechSynthesis.speak(utt);
+}
+
+// ============================================================================
+// 6. NAVIGATION, SIDEBAR & THEME MANAGEMENT
+// ============================================================================
+function getCurrentTopic() {
+  return CURRICULUM.find(t => t.id === state.topicId) || CURRICULUM.find(t => t.grade === state.grade) || CURRICULUM[0];
+}
+
+function setLanguage(lang) {
+  stopVoice();
+  state.lang = lang;
+  saveState();
+
+  document.getElementById('langEnBtn').className = lang === 'en'
+    ? 'px-2.5 py-1 rounded-lg text-xs font-bold transition bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm'
+    : 'px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900';
+  document.getElementById('langAfBtn').className = lang === 'af'
+    ? 'px-2.5 py-1 rounded-lg text-xs font-bold transition bg-white dark:bg-slate-700 text-brand-600 dark:text-white shadow-sm'
+    : 'px-2.5 py-1 rounded-lg text-xs font-bold transition text-slate-600 dark:text-slate-400 hover:text-slate-900';
+
+  applyStaticTranslations();
+  updateHeaderGamification();
+  renderSidebar();
+  renderCurrentView();
+}
+
+function applyStaticTranslations() {
+  const t = UI_TEXT[state.lang];
+  document.getElementById('headerSubtitle').textContent = t.headerSubtitle;
+  document.getElementById('sidebarCurriculumHeading').textContent = t.curriculumTopics;
+  document.getElementById('topicSearchInput').placeholder = t.searchPlaceholder;
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (t[key]) el.textContent = t[key];
+  });
+}
+
+function toggleTheme() {
+  state.darkMode = !state.darkMode;
+  saveState();
+  applyTheme();
+}
+
+function applyTheme() {
+  const html = document.documentElement;
+  const icon = document.getElementById('themeIcon');
+  if (state.darkMode) {
+    html.classList.add('dark');
+    icon.className = 'fa-solid fa-sun text-amber-400';
+  } else {
+    html.classList.remove('dark');
+    icon.className = 'fa-solid fa-moon';
+  }
+}
+
+function selectGrade(grade) {
+  stopVoice();
+  state.grade = grade;
+  const firstTopic = CURRICULUM.find(t => t.grade === grade);
+  if (firstTopic && getCurrentTopic().grade !== grade) {
+    state.topicId = firstTopic.id;
+  }
+  saveState();
+  updateGradeButtons();
+  renderSidebar();
+  renderCurrentView();
+}
+
+function updateGradeButtons() {
+  [9, 10, 11].forEach(g => {
+    const btn = document.getElementById(`gradeBtn-${g}`);
+    if (g === state.grade) {
+      btn.className = 'grade-btn px-2.5 py-1 rounded text-xs font-bold transition bg-brand-600 text-white shadow-sm';
+    } else {
+      btn.className = 'grade-btn px-2.5 py-1 rounded text-xs font-bold transition text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700';
+    }
+  });
+}
+
+function selectTopic(topicId) {
+  stopVoice();
+  state.topicId = topicId;
+  const topic = getCurrentTopic();
+  state.grade = topic.grade;
+  saveState();
+  updateGradeButtons();
+  renderSidebar();
+  if (state.activeTab !== 'learn' && state.activeTab !== 'quiz') {
+    state.activeTab = 'learn';
+    updateNavTabs();
+  }
+  renderCurrentView();
+  toggleMobileSidebar(false);
+}
+
+function setActiveTab(tab) {
+  stopVoice();
+  clearGameTimers();
+  state.activeTab = tab;
+  saveState();
+  updateNavTabs();
+  renderCurrentView();
+}
+
+function updateNavTabs() {
+  document.querySelectorAll('.nav-tab').forEach(btn => {
+    if (btn.id === `tab-${state.activeTab}`) {
+      btn.className = 'nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition bg-brand-600 text-white shadow-sm';
+    } else {
+      btn.className = 'nav-tab flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-semibold whitespace-nowrap transition text-slate-600 dark:text-slate-300 hover:bg-slate-200/60 dark:hover:bg-slate-800';
+    }
+  });
+}
+
+function toggleMobileSidebar(open) {
+  const sidebar = document.getElementById('sidebar');
+  const overlay = document.getElementById('sidebarOverlay');
+  if (open) {
+    sidebar.classList.remove('-translate-x-full');
+    overlay.classList.remove('hidden');
+  } else {
+    sidebar.classList.add('-translate-x-full');
+    overlay.classList.add('hidden');
+  }
+}
+
+document.getElementById('mobileMenuBtn').addEventListener('click', () => toggleMobileSidebar(true));
+document.getElementById('closeSidebarBtn').addEventListener('click', () => toggleMobileSidebar(false));
+
+function renderSidebar() {
+  const lang = state.lang;
+  const query = (document.getElementById('topicSearchInput').value || '').toLowerCase();
+  const gradeTopics = CURRICULUM.filter(t => t.grade === state.grade);
+  const filtered = gradeTopics.filter(t => t.title[lang].toLowerCase().includes(query));
+
+  document.getElementById('sidebarGradeTitle').textContent = `${UI_TEXT[lang].gradeLabel} ${state.grade} CAPS / KABV`;
+
+  const list = document.getElementById('topicList');
+  list.innerHTML = filtered.map(topic => {
+    const active = topic.id === state.topicId;
+    const mastered = state.masteredTopics.includes(topic.id);
+    return `
+      <button onclick="selectTopic('${topic.id}')" class="w-full text-left px-3 py-2.5 rounded-xl text-xs font-semibold flex items-center justify-between gap-2 transition ${active ? 'bg-brand-50 dark:bg-brand-950/60 text-brand-700 dark:text-brand-300 border border-brand-200 dark:border-brand-800 shadow-sm' : 'text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/70'}">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg ${active ? 'bg-brand-600 text-white' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'} flex items-center justify-center shrink-0">
+            <i class="fa-solid ${topic.icon}"></i>
+          </div>
+          <span class="truncate">${topic.title[lang]}</span>
+        </div>
+        ${mastered ? '<i class="fa-solid fa-circle-check text-emerald-500 shrink-0" title="Mastered"></i>' : ''}
+      </button>
+    `;
+  }).join('');
+
+  const totalTopics = CURRICULUM.length;
+  const masteredCount = state.masteredTopics.length;
+  document.getElementById('masteredCountText').textContent = `${masteredCount} / ${totalTopics}`;
+  document.getElementById('masteryProgressBar').style.width = `${Math.round((masteredCount / totalTopics) * 100)}%`;
+}
+
+// ============================================================================
+// 7. VIEW RENDERERS (LESSON, QUIZ, MOCK TEST, DAILY CHALLENGE, GAMES)
+// ============================================================================
+function renderCurrentView() {
+  const container = document.getElementById('viewContainer');
+  if (state.activeTab === 'learn') renderLessonView(container);
+  else if (state.activeTab === 'directory') renderTopicDirectoryView(container);
+  else if (state.activeTab === 'papers') renderQuestionPapersView(container);
+  else if (state.activeTab === 'quiz') renderTopicQuizView(container);
+  else if (state.activeTab === 'test') renderMockTestView(container);
+  else if (state.activeTab === 'daily') renderDailyChallengeView(container);
+  else if (state.activeTab === 'games') renderGamesArcadeView(container);
+}
+
+// -------------------- A0. COMPLETE OPTIONAL TOPIC DIRECTORY --------------------
+let customMixActive = false;
+
+function toggleOptionalTopic(topicId) {
+  const idx = state.selectedOptionalTopics.indexOf(topicId);
+  if (idx >= 0) state.selectedOptionalTopics.splice(idx, 1);
+  else state.selectedOptionalTopics.push(topicId);
+  saveState();
+  renderCurrentView();
+}
+
+function selectAllGradeTopics() {
+  CURRICULUM.filter(t => t.grade === state.grade).forEach(t => {
+    if (!state.selectedOptionalTopics.includes(t.id)) {
+      state.selectedOptionalTopics.push(t.id);
+    }
+  });
+  saveState();
+  renderCurrentView();
+}
+
+function clearGradeTopics() {
+  const gradeIds = CURRICULUM.filter(t => t.grade === state.grade).map(t => t.id);
+  state.selectedOptionalTopics = state.selectedOptionalTopics.filter(id => !gradeIds.includes(id));
+  saveState();
+  renderCurrentView();
+}
+
+function launchCustomTopicMix() {
+  if (state.selectedOptionalTopics.length === 0) {
+    selectAllGradeTopics();
+  }
+  customMixActive = true;
+  quizSession = { topicId: 'CUSTOM_MIX', index: 0, score: 0, answered: false };
+  setActiveTab('quiz');
+}
+
+function renderTopicDirectoryView(container) {
+  const lang = state.lang;
+  const t = UI_TEXT[lang];
+  const gradeTopics = CURRICULUM.filter(top => top.grade === state.grade);
+  const selectedInGrade = gradeTopics.filter(top => state.selectedOptionalTopics.includes(top.id));
+
+  container.innerHTML = `
+    <div class="max-w-5xl mx-auto space-y-6 animate-pop">
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div>
+          <span class="text-xs font-extrabold uppercase tracking-wider text-brand-600 dark:text-brand-400">${t.gradeLabel} ${state.grade} CAPS / KABV</span>
+          <h2 class="text-xl sm:text-2xl font-extrabold mt-0.5">${t.dirTitle}</h2>
+          <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1 max-w-2xl">${t.dirSubtitle}</p>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 shrink-0">
+          <button onclick="selectAllGradeTopics()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition">
+            ${t.selectAllBtn}
+          </button>
+          <button onclick="clearGradeTopics()" class="px-3 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-xs font-bold transition">
+            ${t.clearSelBtn}
+          </button>
+          <button onclick="launchCustomTopicMix()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-extrabold shadow-md transition flex items-center gap-2">
+            <i class="fa-solid fa-shuffle"></i> ${t.customMixBtn} (${state.selectedOptionalTopics.length})
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        ${gradeTopics.map(top => {
+          const isChecked = state.selectedOptionalTopics.includes(top.id);
+          const isMastered = state.masteredTopics.includes(top.id);
+          return `
+            <div class="bg-white dark:bg-slate-900 border ${isChecked ? 'border-brand-500 ring-1 ring-brand-500/30' : 'border-slate-200 dark:border-slate-800'} rounded-2xl p-5 shadow-sm flex flex-col justify-between transition">
+              <div>
+                <div class="flex items-start justify-between gap-3 mb-3">
+                  <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center text-base shrink-0">
+                      <i class="fa-solid ${top.icon}"></i>
+                    </div>
+                    <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
+                      ${lang === 'en' ? 'Term' : 'Kwartaal'} ${top.term || 1}
+                    </span>
+                  </div>
+                  <label class="inline-flex items-center cursor-pointer" title="Optional topic toggle">
+                    <input type="checkbox" ${isChecked ? 'checked' : ''} onchange="toggleOptionalTopic('${top.id}')" class="w-5 h-5 rounded accent-brand-600 cursor-pointer" />
+                  </label>
+                </div>
+                <h3 class="font-extrabold text-base text-slate-900 dark:text-white mb-1.5">${top.title[lang]}</h3>
+                <p class="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 mb-3">${top.explanation[lang]}</p>
+                <div class="text-[11px] font-semibold text-slate-500 dark:text-slate-400 flex items-center gap-3 mb-4">
+                  <span><i class="fa-solid fa-square-root-variable mr-1 text-brand-500"></i> ${top.formulas.length} ${lang === 'en' ? 'Formulas' : 'Formules'}</span>
+                  <span><i class="fa-solid fa-list-ol mr-1 text-emerald-500"></i> ${top.examples.length} ${lang === 'en' ? 'Examples' : 'Voorbeelde'}</span>
+                  ${isMastered ? `<span class="text-emerald-600 dark:text-emerald-400 font-bold"><i class="fa-solid fa-check-circle"></i></span>` : ''}
+                </div>
+              </div>
+              <div class="flex items-center gap-2 pt-3 border-t border-slate-100 dark:border-slate-800">
+                <button onclick="customMixActive = false; selectTopic('${top.id}'); setActiveTab('learn');" class="flex-1 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/50 text-brand-700 dark:text-brand-300 text-xs font-bold transition">
+                  <i class="fa-solid fa-book-open mr-1"></i> ${lang === 'en' ? 'Open Lesson' : 'Maak Les Oop'}
+                </button>
+                <button onclick="customMixActive = false; selectTopic('${top.id}'); setActiveTab('quiz');" class="px-3 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition" title="Quiz this topic">
+                  <i class="fa-solid fa-play"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// -------------------- A1. MODERN SCHOOL QUESTION PAPERS & MEMOS (TERM 1-4) --------------------
+let paperInteractiveMode = false;
+let paperAnswers = {};
+let paperSubmitted = false;
+let openMemos = {};
+
+function selectPaperTerm(termNum) {
+  state.selectedTerm = termNum;
+  const match = QUESTION_PAPERS.find(p => p.grade === state.grade && p.term === termNum);
+  if (match) state.selectedPaperId = match.id;
+  paperAnswers = {};
+  paperSubmitted = false;
+  openMemos = {};
+  saveState();
+  renderCurrentView();
+}
+
+function togglePaperMemo(qIdx) {
+  openMemos[qIdx] = !openMemos[qIdx];
+  renderCurrentView();
+}
+
+function submitInteractivePaper(paper) {
+  if (paperSubmitted) return;
+  paperSubmitted = true;
+  let earnedMarks = 0;
+  paper.questions.forEach((q, idx) => {
+    const u = paperAnswers[idx];
+    const ok = q.type === 'number' ? Math.abs(parseFloat(u) - q.answer) < 0.01 : u === q.answer;
+    if (ok) earnedMarks += q.marks;
+    openMemos[idx] = true;
+  });
+  const xpGain = Math.max(30, earnedMarks * 10);
+  awardXp(xpGain, state.lang === 'en' ? `Completed ${paper.paperType.en}!` : `${paper.paperType.af} Voltooi!`);
+  renderCurrentView();
+}
+
+function renderQuestionPapersView(container) {
+  const lang = state.lang;
+  const t = UI_TEXT[lang];
+
+  let paper = QUESTION_PAPERS.find(p => p.grade === state.grade && p.term === state.selectedTerm);
+  if (!paper) {
+    paper = QUESTION_PAPERS.find(p => p.grade === state.grade) || QUESTION_PAPERS[0];
+    state.selectedTerm = paper.term;
+  }
+
+  const termLabels = { 1: t.term1Label, 2: t.term2Label, 3: t.term3Label, 4: t.term4Label };
+
+  container.innerHTML = `
+    <div class="max-w-4xl mx-auto space-y-6 animate-pop">
+      <!-- Header & Term Filter Pills -->
+      <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <span class="text-xs font-extrabold uppercase tracking-wider text-purple-600 dark:text-purple-400">${t.gradeLabel} ${state.grade} CAPS • 2025/2026 School Archive</span>
+            <h2 class="text-xl sm:text-2xl font-extrabold mt-0.5">${t.papersTitle}</h2>
+            <p class="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mt-1">${t.papersSubtitle}</p>
+          </div>
+        </div>
+
+        <!-- Term 1 - 4 Selector Tabs -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-2">
+          ${[1, 2, 3, 4].map(termNum => `
+            <button onclick="selectPaperTerm(${termNum})" class="px-3 py-2.5 rounded-xl text-xs font-extrabold border transition text-center ${state.selectedTerm === termNum ? 'bg-purple-600 text-white border-purple-600 shadow-sm' : 'bg-slate-50 dark:bg-slate-800/70 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:border-purple-400'}">
+              ${termLabels[termNum]}
+            </button>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Authentic CAPS Exam Cover Header -->
+      <div class="bg-white dark:bg-slate-900 border-2 border-slate-300 dark:border-slate-700 rounded-2xl p-6 shadow-sm">
+        <div class="flex flex-wrap items-center justify-between border-b-2 border-slate-800 dark:border-slate-600 pb-3 mb-4 text-xs font-extrabold uppercase tracking-wider">
+          <span>${lang === 'en' ? 'DEPARTMENT OF BASIC EDUCATION • CAPS' : 'DEPARTEMENT VAN BASIESE ONDERWYS • KABV'}</span>
+          <span>${t.gradeLabel} ${paper.grade}</span>
+          <span>${paper.paperType[lang]}</span>
+        </div>
+
+        <div class="text-center my-4">
+          <h3 class="text-lg sm:text-xl font-extrabold uppercase">${paper.title[lang]}</h3>
+          <div class="flex justify-center gap-6 mt-2 text-xs font-bold text-slate-600 dark:text-slate-400">
+            <span><i class="fa-solid fa-star text-amber-500 mr-1"></i> ${t.totalMarksLabel}: ${paper.totalMarks}</span>
+            <span><i class="fa-regular fa-clock text-brand-500 mr-1"></i> ${t.durationLabel}: ${paper.duration[lang]}</span>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/70 border border-slate-200 dark:border-slate-700 text-xs space-y-1 mb-4">
+          <p class="font-extrabold uppercase text-slate-700 dark:text-slate-200">${t.instructionsHeader}:</p>
+          <p class="text-slate-600 dark:text-slate-400">1. ${lang === 'en' ? 'Clearly show ALL calculations, diagrams, and steps used in determining your answers.' : 'Toon ALLE berekeninge, diagramme en stappe duidelik om jou antwoorde te bepaal.'}</p>
+          <p class="text-slate-600 dark:text-slate-400">2. ${lang === 'en' ? 'Answers only will NOT necessarily be awarded full marks.' : 'Slegs antwoorde sal NIE noodwendig volpunte kry nie.'}</p>
+        </div>
+
+        <!-- Mode Toggle: Study Memo Mode vs Interactive Exam Mode -->
+        <div class="flex flex-wrap items-center justify-between gap-2 pt-2">
+          <div class="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-1 rounded-xl">
+            <button onclick="paperInteractiveMode = false; renderCurrentView();" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${!paperInteractiveMode ? 'bg-white dark:bg-slate-700 text-purple-600 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+              <i class="fa-solid fa-book-open-reader mr-1"></i> ${t.memoModeBtn}
+            </button>
+            <button onclick="paperInteractiveMode = true; paperSubmitted = false; paperAnswers = {}; renderCurrentView();" class="px-3 py-1.5 rounded-lg text-xs font-bold transition ${paperInteractiveMode ? 'bg-white dark:bg-slate-700 text-emerald-600 dark:text-white shadow-sm' : 'text-slate-600 dark:text-slate-400'}">
+              <i class="fa-solid fa-pen-to-square mr-1"></i> ${t.interactiveExamBtn}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Exam Questions & Step-by-Step Marking Guidelines -->
+      <div class="space-y-4">
+        ${paper.questions.map((q, idx) => {
+          const uAns = paperAnswers[idx];
+          const isOk = paperSubmitted && (q.type === 'number' ? Math.abs(parseFloat(uAns) - q.answer) < 0.01 : uAns === q.answer);
+          const showMemo = !paperInteractiveMode ? !!openMemos[idx] : paperSubmitted;
+          const memoSpeech = `${q.prompt[lang]}. ${q.memo[lang].join('. ')}`;
+
+          return `
+            <div class="bg-white dark:bg-slate-900 border ${paperSubmitted ? (isOk ? 'border-emerald-500' : 'border-rose-500') : 'border-slate-200 dark:border-slate-800'} rounded-2xl p-5 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded-lg bg-slate-900 dark:bg-slate-800 text-white font-extrabold text-xs">${lang === 'en' ? 'QUESTION' : 'VRAAG'} ${q.num}</span>
+                  <span class="text-xs font-bold text-purple-600 dark:text-purple-400">${q.topic[lang]}</span>
+                </div>
+                <span class="px-2.5 py-1 rounded-full bg-amber-50 dark:bg-amber-950/50 text-amber-700 dark:text-amber-300 font-extrabold text-xs">[${q.marks} ${t.marksLabel}]</span>
+              </div>
+
+              <p class="font-bold text-sm sm:text-base text-slate-800 dark:text-slate-100 my-3">${q.prompt[lang]}</p>
+
+              ${paperInteractiveMode ? `
+                <div class="my-3">
+                  ${q.type === 'number' ? `
+                    <input type="number" step="any" ${paperSubmitted ? 'disabled' : ''} value="${uAns !== undefined ? uAns : ''}" onchange="paperAnswers[${idx}] = this.value" placeholder="${t.enterNumberPlaceholder}" class="w-full sm:w-64 px-3.5 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 font-bold text-sm" />
+                  ` : `
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                      ${q.options.map((opt, oIdx) => `
+                        <button ${paperSubmitted ? 'disabled' : ''} onclick="paperAnswers[${idx}] = ${oIdx}; renderCurrentView();" class="text-left px-3.5 py-2.5 rounded-xl border text-xs sm:text-sm font-semibold transition ${uAns === oIdx ? 'border-purple-600 bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300' : 'border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800'}">
+                          <span class="font-bold mr-1.5">${String.fromCharCode(65 + oIdx)}.</span> <span class="math-expr">${opt}</span>
+                        </button>
+                      `).join('')}
+                    </div>
+                  `}
+                </div>
+              ` : `
+                <div class="flex flex-wrap items-center gap-2 mt-3">
+                  <button onclick="togglePaperMemo(${idx})" class="px-3.5 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 border border-purple-200 dark:border-purple-800 text-xs font-bold hover:bg-purple-100 transition">
+                    <i class="fa-solid ${showMemo ? 'fa-eye-slash' : 'fa-check-double'} mr-1.5"></i> ${showMemo ? t.hideMemoBtn : t.showMemoBtn}
+                  </button>
+                  <button onclick="speakCustomText(this)" data-speech="${memoSpeech.replace(/"/g, '&quot;')}" class="px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 text-xs font-bold hover:bg-slate-200 transition">
+                    <i class="fa-solid fa-volume-high mr-1.5 text-brand-500"></i> ${t.listenMemoBtn}
+                  </button>
+                </div>
+              `}
+
+              ${showMemo ? `
+                <div class="mt-4 p-4 rounded-xl bg-emerald-50/70 dark:bg-emerald-950/25 border border-emerald-200 dark:border-emerald-800/60 space-y-1.5">
+                  <p class="text-xs font-extrabold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 mb-1">
+                    <i class="fa-solid fa-clipboard-check mr-1"></i> ${lang === 'en' ? 'Marking Guideline / Memorandum' : 'Nasienriglyn / Memorandum'}
+                  </p>
+                  ${q.memo[lang].map((step, sIdx) => `
+                    <div class="text-xs sm:text-sm text-slate-800 dark:text-slate-200 font-medium flex items-start gap-2">
+                      <span class="text-emerald-600 font-bold">✓</span>
+                      <span>${step}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+            </div>
+          `;
+        }).join('')}
+      </div>
+
+      ${paperInteractiveMode && !paperSubmitted ? `
+        <button onclick='submitInteractivePaper(${JSON.stringify(paper).replace(/'/g, "&#39;")})' class="w-full py-3.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-sm shadow-md transition">
+          <i class="fa-solid fa-paper-plane mr-1.5"></i> ${t.submitTestBtn}
+        </button>
+      ` : ''}
+    </div>
+  `;
+}
+// -------------------- B. TOPIC QUIZ VIEW --------------------
+let quizSession = { topicId: null, index: 0, score: 0, answered: false };
+
+function getActiveQuizQuestions() {
+  if (customMixActive && state.selectedOptionalTopics.length > 0) {
+    return CURRICULUM
+      .filter(t => state.selectedOptionalTopics.includes(t.id))
+      .flatMap(t => t.quizzes.map(q => ({ ...q, subTopicTitle: t.title })));
+  }
+  return getCurrentTopic().quizzes;
+}
+
+function renderTopicQuizView(container) {
+  const topic = getCurrentTopic();
+  const lang = state.lang;
+  const t = UI_TEXT[lang];
+  const activeKey = customMixActive ? 'CUSTOM_MIX' : topic.id;
+
+  if (quizSession.topicId !== activeKey) {
+    quizSession = { topicId: activeKey, index: 0, score: 0, answered: false };
+  }
+
+  const questions = getActiveQuizQuestions();
+  const quizHeaderLabel = customMixActive
+    ? `${t.customMixBtn} (${state.selectedOptionalTopics.length} ${t.selectedCountLabel})`
+    : topic.title[lang];
+
+  if (quizSession.index >= questions.length) {
+    // Quiz Summary
+    if (!customMixActive && !state.masteredTopics.includes(topic.id) && quizSession.score >= Math.ceil(questions.length * 0.6)) {
+      state.masteredTopics.push(topic.id);
+      saveState();
+      renderSidebar();
+      awardXp(50, lang === 'en' ? `Mastered: ${topic.title.en}!` : `Bemeester: ${topic.title.af}!`);
+    }
+    container.innerHTML = `
+      <div class="max-w-xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center shadow-lg animate-pop">
+        <div class="w-16 h-16 rounded-2xl bg-emerald-100 dark:bg-emerald-950 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-3xl mx-auto mb-4">
+          <i class="fa-solid fa-award"></i>
+        </div>
+        <h2 class="text-2xl font-extrabold mb-1">${t.quizCompleteTitle}</h2>
+        <p class="text-sm text-slate-500 dark:text-slate-400 mb-6">${quizHeaderLabel}</p>
+        <div class="text-4xl font-extrabold text-brand-600 dark:text-brand-400 mb-2">${quizSession.score} / ${questions.length}</div>
+        <p class="text-xs font-bold text-amber-600 dark:text-amber-400 mb-6">+${quizSession.score * 25} XP Earned</p>
+        <div class="flex flex-wrap justify-center gap-3">
+          <button onclick="restartTopicQuiz()" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-bold text-sm hover:bg-brand-700 transition">${t.tryAgain}</button>
+          <button onclick="customMixActive = false; setActiveTab('learn')" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-sm hover:bg-slate-200 transition">${t.backToLesson}</button>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  const qObj = questions[quizSession.index];
+  container.innerHTML = `
+    <div class="max-w-2xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4 mb-5">
+        <div>
+          <span class="text-xs font-bold uppercase text-brand-600 dark:text-brand-400">${qObj.subTopicTitle ? qObj.subTopicTitle[lang] : quizHeaderLabel}</span>
+          <h2 class="text-lg font-extrabold">${t.quizTitle}</h2>
+        </div>
+        <span class="px-3 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-xs font-bold">
+          ${t.questionLabel} ${quizSession.index + 1} ${t.ofLabel} ${questions.length}
+        </span>
+      </div>
+function submitChoiceQuiz(selectedIdx) {
+  if (quizSession.answered) return;
+  quizSession.answered = true;
+  const qObj = getActiveQuizQuestions()[quizSession.index];
+  const isCorrect = selectedIdx === qObj.answer;
+
+  document.querySelectorAll('.quiz-opt-btn').forEach((btn, idx) => {
+    btn.disabled = true;
+    if (idx === qObj.answer) {
+      btn.classList.add('border-emerald-500', 'bg-emerald-50', 'dark:bg-emerald-950/40', 'text-emerald-800', 'dark:text-emerald-200');
+    } else if (idx === selectedIdx && !isCorrect) {
+      btn.classList.add('border-rose-500', 'bg-rose-50', 'dark:bg-rose-950/40', 'text-rose-800', 'dark:text-rose-200');
+    }
+  });
+
+  handleQuizResult(isCorrect, qObj.solution[state.lang]);
+}
+
+function submitNumericQuiz() {
+  if (quizSession.answered) return;
+  const inp = document.getElementById('numericQuizInput');
+  const val = parseFloat(inp.value);
+  if (isNaN(val)) return;
+  quizSession.answered = true;
+  inp.disabled = true;
+  document.getElementById('submitNumBtn').disabled = true;
+
+  const qObj = getActiveQuizQuestions()[quizSession.index];
+  const isCorrect = Math.abs(val - qObj.answer) < 0.01;
+  handleQuizResult(isCorrect, qObj.solution[state.lang]);
+}
+
+function handleQuizResult(isCorrect, solutionText) {
+  const t = UI_TEXT[state.lang];
+  const totalQs = getActiveQuizQuestions().length;
+  state.questionsSolved++;
+  if (isCorrect) {
+    quizSession.score++;
+    awardXp(25, state.lang === 'en' ? 'Correct quiz answer!' : 'Korrekte vasvra-antwoord!');
+  }
+  saveState();
+
+  const fb = document.getElementById('quizFeedbackBox');
+  fb.classList.remove('hidden');
+  fb.className = `mt-5 p-4 rounded-xl border ${isCorrect ? 'bg-emerald-50/80 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800' : 'bg-rose-50/80 dark:bg-rose-950/30 border-rose-300 dark:border-rose-800'}`;
+  fb.innerHTML = `
+    <p class="font-extrabold text-sm ${isCorrect ? 'text-emerald-700 dark:text-emerald-300' : 'text-rose-700 dark:text-rose-300'} mb-1">
+      <i class="fa-solid ${isCorrect ? 'fa-circle-check' : 'fa-circle-xmark'} mr-1.5"></i> ${isCorrect ? t.correctMsg : t.incorrectMsg}
+    </p>
+    <p class="text-xs sm:text-sm text-slate-700 dark:text-slate-300 mb-4">${solutionText}</p>
+    <button onclick="nextQuizQuestion()" class="px-4 py-2 rounded-xl bg-brand-600 text-white text-xs font-bold hover:bg-brand-700 transition">
+      ${quizSession.index + 1 >= totalQs ? t.finishQuiz : t.nextQuestion} <i class="fa-solid fa-arrow-right ml-1"></i>
+    </button>
+  `;
+}
+
+function nextQuizQuestion() {
+  quizSession.index++;
+  quizSession.answered = false;
+  renderCurrentView();
+}
+
+function restartTopicQuiz() {
+  quizSession = { topicId: customMixActive ? 'CUSTOM_MIX' : getCurrentTopic().id, index: 0, score: 0, answered: false };
+  renderCurrentView();
+}
+
+function finishMiniGame() {
+  const earnedXp = Math.max(15, Math.round(gameScore / 2));
+  if (gameScore > state.gameHighScore) state.gameHighScore = gameScore;
+  awardXp(earnedXp, state.lang === 'en' ? `Arcade Score: ${gameScore} pts!` : `Arkade-telling: ${gameScore} punte!`);
+  const container = document.getElementById('viewContainer');
+  container.innerHTML = `
+    <div class="max-w-md mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-8 text-center shadow-lg animate-pop">
+      <div class="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950 text-amber-500 flex items-center justify-center text-3xl mx-auto mb-4">
+        <i class="fa-solid fa-trophy"></i>
+      </div>
+      <h2 class="text-2xl font-extrabold mb-1">${state.lang === 'en' ? "Time's Up!" : 'Tyd is Verstreke!'}</h2>
+      <p class="text-4xl font-extrabold text-brand-600 dark:text-brand-400 my-3">${gameScore} pts</p>
+      <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400 mb-6">+${earnedXp} XP Earned</p>
+      <div class="flex justify-center gap-3">
+        <button onclick="startMiniGame('${activeGame}')" class="px-5 py-2.5 rounded-xl bg-brand-600 text-white font-bold text-xs">${UI_TEXT[state.lang].tryAgain}</button>
+        <button onclick="activeGame = null; renderCurrentView();" class="px-5 py-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 font-bold text-xs">Arcade Menu</button>
+      </div>
+    </div>
+  `;
+}
+
+// --- MINI GAME 1: EQUATION RUSH ---
+let currentEqProblem = null;
+function genEquationProblem() {
+  const type = Math.floor(Math.random() * 3);
+  if (type === 0) {
+    const x = Math.floor(Math.random() * 12) - 4;
+    const a = Math.floor(Math.random() * 5) + 2;
+    const b = Math.floor(Math.random() * 15) - 7;
+    const c = a * x + b;
+    return { prompt: `${a}x ${b >= 0 ? '+ ' + b : '- ' + Math.abs(b)} = ${c}`, ans: x };
+  } else if (type === 1) {
+    const x = Math.floor(Math.random() * 9) + 2;
+    return { prompt: `x² = ${x * x}  (x > 0)`, ans: x };
+  } else {
+    const x = Math.floor(Math.random() * 6) + 1;
+    return { prompt: `2ˣ = ${Math.pow(2, x)}`, ans: x };
+  }
+}
+
+function renderEquationRushGame(container) {
+  currentEqProblem = genEquationProblem();
+  const options = new Set([currentEqProblem.ans]);
+  while (options.size < 4) {
+    options.add(currentEqProblem.ans + (Math.floor(Math.random() * 9) - 4));
+  }
+  const shuffled = [...options].sort(() => Math.random() - 0.5);
+
+  container.innerHTML = renderGameShell(
+    state.lang === 'en' ? 'Equation Rush' : 'Vergelyking-stormloop',
+    `<p class="text-xs font-bold uppercase text-slate-400 mb-2">${state.lang === 'en' ? 'Solve for x:' : 'Los op vir x:'}</p>
+     <div class="math-expr text-3xl sm:text-4xl font-extrabold text-slate-900 dark:text-white my-6">${currentEqProblem.prompt}</div>
+     <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+       ${shuffled.map(opt => `
+         <button onclick="answerMiniGame(${opt === currentEqProblem.ans})" class="py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-600 hover:text-white font-extrabold text-lg transition">
+           x = ${opt}
+         </button>
+       `).join('')}
+     </div>`
+  );
+}
+
+// --- MINI GAME 2: PATTERN DETECTIVE ---
+function renderPatternDetectiveGame(container) {
+  const isQuad = Math.random() > 0.45;
+  let seqText = '';
+  let ans = 0;
+  if (!isQuad) {
+    const a = Math.floor(Math.random() * 10) + 1;
+    const d = Math.floor(Math.random() * 8) - 2 || 3;
+    seqText = `${a} ; ${a + d} ; ${a + 2 * d} ; ? ; ${a + 4 * d}`;
+    ans = a + 3 * d;
+  } else {
+    const a = Math.floor(Math.random() * 3) + 1;
+    const c = Math.floor(Math.random() * 5);
+    const t = n => a * n * n + c;
+    seqText = `${t(1)} ; ${t(2)} ; ${t(3)} ; ?`;
+    ans = t(4);
+  }
+  const options = new Set([ans]);
+  while (options.size < 4) options.add(ans + (Math.floor(Math.random() * 11) - 5));
+  const shuffled = [...options].sort(() => Math.random() - 0.5);
+
+  container.innerHTML = renderGameShell(
+    state.lang === 'en' ? 'Pattern Detective' : 'Patroon-speurder',
+    `<p class="text-xs font-bold uppercase text-slate-400 mb-2">${state.lang === 'en' ? 'Find the missing term (?):' : 'Vind die vermiste term (?):'}</p>
+     <div class="math-expr text-2xl sm:text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 my-6">${seqText}</div>
+     <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+       ${shuffled.map(opt => `
+         <button onclick="answerMiniGame(${opt === ans})" class="py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-emerald-600 hover:text-white font-extrabold text-lg transition">
+           ${opt}
+         </button>
+       `).join('')}
+     </div>`
+  );
+}
+
+// --- MINI GAME 3: TRIG & ANGLE TARGET ---
+const TRIG_CARDS = [
+  { q: 'sin 30°', a: '½' }, { q: 'cos 60°', a: '½' }, { q: 'tan 45°', a: '1' },
+  { q: 'sin 90°', a: '1' }, { q: 'cos 0°', a: '1' }, { q: 'sin²θ + cos²θ', a: '1' },
+  { q: 'sin(180° - θ)', a: 'sin θ' }, { q: 'cos(90° - θ)', a: 'sin θ' },
+  { q: 'tan(180° + θ)', a: 'tan θ' }, { q: 'cos(360° - θ)', a: 'cos θ' }
+];
+function renderTrigTargetGame(container) {
+  const card = TRIG_CARDS[Math.floor(Math.random() * TRIG_CARDS.length)];
+  const pool = ['½', '1', '0', '-1', 'sin θ', '-sin θ', 'cos θ', 'tan θ'];
+  const options = new Set([card.a]);
+  while (options.size < 4) options.add(pool[Math.floor(Math.random() * pool.length)]);
+  const shuffled = [...options].sort(() => Math.random() - 0.5);
+
+  container.innerHTML = renderGameShell(
+    state.lang === 'en' ? 'Trig & Angle Target' : 'Trig & Hoek-teiken',
+    `<p class="text-xs font-bold uppercase text-slate-400 mb-2">${state.lang === 'en' ? 'Simplify / Evaluate:' : 'Vereenvoudig / Bereken:'}</p>
+     <div class="math-expr text-3xl sm:text-4xl font-extrabold text-purple-600 dark:text-purple-400 my-6">${card.q}</div>
+     <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto">
+       ${shuffled.map(opt => `
+         <button onclick="answerMiniGame(${opt === card.a})" class="py-3.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-purple-600 hover:text-white font-extrabold text-lg transition">
+           ${opt}
+         </button>
+       `).join('')}
+     </div>`
+  );
+}
+
+function renderGameShell(title, innerHtml) {
+  const t = UI_TEXT[state.lang];
+  return `
+    <div class="max-w-xl mx-auto bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-md text-center animate-pop">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3 mb-4">
+        <button onclick="clearGameTimers(); activeGame = null; renderCurrentView();" class="text-xs font-bold text-slate-500 hover:text-slate-800">
+          <i class="fa-solid fa-arrow-left mr-1"></i> Exit
+        </button>
+        <span class="font-extrabold text-sm">${title}</span>
+        <span id="miniGameTimer" class="px-2.5 py-1 rounded-lg bg-rose-100 dark:bg-rose-950 text-rose-600 dark:text-rose-400 font-extrabold text-xs">${gameTime}s</span>
+      </div>
+      <div class="flex justify-center gap-6 text-xs font-extrabold mb-2">
+        <span class="text-brand-600 dark:text-brand-400">${t.scoreLabel}: ${gameScore}</span>
+        <span class="text-amber-500">${t.comboLabel}: ${gameCombo}x</span>
+      </div>
+      ${innerHtml}
+    </div>
+  `;
+}
+
+function answerMiniGame(isCorrect) {
+  if (isCorrect) {
+    gameScore += 10 * gameCombo;
+    gameCombo = Math.min(5, gameCombo + 1);
+  } else {
+    gameCombo = 1;
+  }
+  renderCurrentView();
+}
+
+// ============================================================================
+// 8. INITIALIZE APPLICATION ON LOAD
+// ============================================================================
+window.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  setLanguage(state.lang);
+  updateGradeButtons();
+  updateNavTabs();
+  updateHeaderGamification();
+  renderSidebar();
+  renderCurrentView();
+});
+</script>
+</body>
+</html>
